@@ -1,0 +1,22 @@
+{
+  "name": "common",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./sql-template-tag": "./sql-template-tag.js",
+    "./sql-template-tag.js": "./sql-template-tag.js",
+    "./Config": "./src/Config.js",
+    "./src/*.js": "./src/*.js",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@aws-sdk/credential-providers": "^3.357.0",
+    "dotenv-defaults": "^5.0.2",
+    "non-maybe": "^1.0.1",
+    "short-hash": "^1.0.0",
+    "sql-template-tag": "3.3.0"
+  }
+}

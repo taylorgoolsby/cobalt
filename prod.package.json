@@ -1,0 +1,23 @@
+{
+  "name": "agencyai.gg",
+  "private": true,
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "description": "A UI for multiagent AI",
+  "keywords": [],
+  "files": [],
+  "type": "module",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node backend/src/start.js",
+    "install-common": "cd common && npm install --omit=dev",
+    "install-backend": "cd backend && rm -rf node_modules/bcrypt && npm install --omit=dev --loglevel=error",
+    "postinstall": "npm run install-common && npm run install-backend"
+  },
+  "dependencies": {
+    "cross-env": "7.0.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

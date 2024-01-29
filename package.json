@@ -1,0 +1,71 @@
+{
+  "name": "agencyai-gg",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "description": "A UI for multiagent AI.",
+  "keywords": [],
+  "files": [],
+  "type": "module",
+  "scripts": {
+    "start": "rebuild -w src/common -w src/backend -w src/api -w src/cloud -w src/mysql --output build --transform 'src/*/{!(node_modules),node_modules/common}/**/*.{js,mjs}' --using scripts/transformer.js --fork build/backend/src/schema/generateSchema.js --fork build/backend/src/email/startLocalEmailServer.js --fork build/mysql/src/localStart.js --fork build/backend/src/start.js -k 3306 -k 4000 -k 5555",
+    "start-ssr": "npm run build-web-local && cross-env USE_LOCALCAN=true rebuild -w src/common -w src/backend -w src/api -w src/cloud -w src/mysql -w src/web --output build --transform 'src/*/{!(node_modules),node_modules/common}/**/*.{js,mjs}' --using scripts/transformer.js --fork build/backend/src/schema/generateSchema.js --fork build/backend/src/email/startLocalEmailServer.js --fork build/mysql/src/localStart.js --fork build/backend/src/start.js -k 3306 -k 4000 -k 5555",
+    "mysql": "rebuild --watch src --output build --transform 'src/*/{!(node_modules),node_modules/common}/**/*.{js,mjs}' --using scripts/transformer.js --fork build/mysql/src/localStart.js -k 3306",
+    "clean-sql": "node src/mysql/src/localClean.js",
+    "build": "npm run build-web && rebuild -w src --output build --transform 'src/*/{!(node_modules),node_modules/common}/**/*.{js,mjs}' --using scripts/transformer.js && rm -rf artifact && mkdir artifact && cp -r build/backend artifact/backend && rm -rf build/common/secrets && cp -r build/common artifact/common && cp -r build/web/dist artifact/backend/src/dist && cp prod.package.json artifact/package.json && cp -r .platform artifact/.platform && node scripts/link-common.js && npm run install-artifact && node scripts/zip.js",
+    "create-eb": "eb create agencyai-gg-prod-backend --sample --profile multiagent --instance-type t4g.micro --min-instance=1 --max-instances=1 --envvars $(node scripts/printEnvString.js)",
+    "deploy-eb": "npm run build && eb deploy agencyai-gg-prod-backend --profile multiagent",
+    "deploy-cdk": "cdk bootstrap --profile multiagent && cdk deploy --profile multiagent",
+    "build-web": "cd src/web && yarn build",
+    "build-web-local": "cd src/web && yarn build-local",
+    "install-common": "cd src/common && yarn && npm link",
+    "install-mysql": "cd src/mysql && yarn",
+    "install-api": "cd src/api && yarn",
+    "install-backend": "cd src/backend && yarn",
+    "install-cloud": "cd src/cloud && yarn",
+    "install-web": "cd src/web && yarn",
+    "install-artifact": "cd artifact && npm --omit=dev install",
+    "postinstall": "npm run install-common && npm run install-mysql && npm run install-api && npm run install-backend && npm run install-cloud && npm run install-web"
+  },
+  "gitHooks": {
+    "pre-commit": "yarn flow check && lint-staged"
+  },
+  "lint-staged": {
+    "*.js": "prettier --write"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.10",
+    "@babel/preset-react": "^7.22.5",
+    "aws-cdk": "^2.85.0",
+    "axios": "^1.4.0",
+    "cross-env": "^7.0.3",
+    "cross-port-killer": "^1.4.0",
+    "delay": "^6.0.0",
+    "dotenv-defaults": "^5.0.2",
+    "flow-bin": "^0.211.1",
+    "flow-remove-types": "^2.202.0",
+    "fs-extra": "^11.1.1",
+    "jsx-to-hyperscript": "^2.2.0",
+    "lint-staged": "^13.1.2",
+    "micro-fs": "1.0.3",
+    "node-fetch": "^3.3.1",
+    "nodemon": "^2.0.20",
+    "prettier": "^2.8.4",
+    "rebuild-aio": "1.5.3",
+    "serverless": "^3.28.1",
+    "serverless-domain-manager": "^6.4.3",
+    "serverless-dotenv-plugin": "^4.0.2",
+    "serverless-offline": "^12.0.4",
+    "tape": "^5.6.3",
+    "web-imports": "^3.1.13",
+    "yorkie": "^2.0.0"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "deep-equal": "^2.2.2",
+    "fast-deep-equal": "^3.1.3"
+  }
+}

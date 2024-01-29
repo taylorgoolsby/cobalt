@@ -1,0 +1,21 @@
+{
+  "name": "mysql",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "cross-env IS_LOCAL=true rebuild --watch src --transform 'src/**/*.{js,mjs}' --using ../../scripts/transformer.js --output build --fork build/localStart.js -k 3306",
+    "clean-sql": "node src/localClean.js",
+    "postinstall": "npm link common"
+  },
+  "dependencies": {
+    "mysql": "^2.18.1",
+    "tcp-port-used": "^1.0.2"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "rebuild-aio": "^1.4.0"
+  }
+}

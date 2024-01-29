@@ -1,0 +1,450 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+directive @sql(unicode: Boolean, auto: Boolean, default: String, index: Boolean, nullable: Boolean, primary: Boolean, type: String, unique: Boolean, generated: String, constraints: String) on OBJECT | FIELD_DEFINITION
+
+directive @id(from: [String], name: String) on OBJECT
+
+directive @private on OBJECT | FIELD_DEFINITION
+
+directive @pagination on FIELD_DEFINITION
+
+type Query {
+  viewer(sessionToken: String): Viewer
+}
+
+type Mutation {
+  createAccount(input: CreateAccountInput!): CreateAccountResponse!
+  createAgency(input: CreateAgencyInput!): CreateAgencyResponse!
+  createAgent(input: CreateAgentInput!): CreateAgentResponse!
+  createAuthToken(input: CreateAuthTokenInput!): CreateAuthTokenResponse!
+  deleteAgency(input: DeleteAgencyInput!): DeleteAgencyResponse!
+  deleteAgent(input: DeleteAgentInput!): DeleteAgentResponse!
+  deleteAuthToken(input: DeleteAuthTokenInput!): DeleteAuthTokenResponse!
+  getDemoExample(input: GetDemoExampleInput!): GetDemoExampleResponse!
+  getDemoSessionToken(input: GetDemoSessionTokenInput!): GetDemoSessionTokenResponse!
+  mergeAccounts(input: MergeAccountsInput!): MergeAccountsResponse!
+  sendMfaCode(input: SendMfaCodeInput!): SendMfaCodeResponse!
+  testOpenAiKey(input: TestOpenAiKeyInput!): TestOpenAiKeyResponse!
+  updateAgency(input: UpdateAgencyInput!): UpdateAgencyResponse!
+  updateAgent(input: UpdateAgentInput!): UpdateAgentResponse!
+  updateSettings(input: UpdateSettingsInput!): UpdateSettingsResponse!
+  verifyMfaCode(input: VerifyMfaCodeInput!): VerifyMfaCodeResponse!
+  verifyPassword(input: VerifyPasswordInput!): VerifyPasswordResponse!
+}
+
+scalar JSON
+
+type Agency @id(from: ["agencyId"]) {
+  agencyId: Int @sql(primary: true, auto: true)
+  versionId: Int @sql(type: "INT", default: "0", index: true)
+  lookupId: String @sql(type: "BINARY(16)", index: true)
+  userId: String @sql(type: "BINARY(16)", index: true)
+  name: String @sql(type: "VARCHAR(170)", unicode: true)
+  description: String @sql(type: "TEXT", unicode: true)
+  isPrivate: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  isDeleted: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  """Unique ID"""
+  id: ID
+  agents: [Agent!]!
+  agencyConversation(agencyConversationId: String): AgencyConversation
+  debuggingConversations: [AgencyConversation!]!
+  versions: [Agency!]!
+}
+
+type AgencyConversation {
+  agencyConversationId: String @sql(type: "BINARY(16)", primary: true)
+  agencyId: Int @sql(type: "INT", index: true)
+  name: String @sql(type: "VARCHAR(170)", unicode: true)
+  startedByUserId: String @sql(type: "BINARY(16)")
+  isDeleted: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+  managerConversation: AgentConversation
+  agentConversations: [AgentConversation!]!
+}
+
+type Agent {
+  agentId: Int @sql(primary: true, auto: true)
+  versionId: Int @sql(type: "INT", default: "0", index: true)
+  agencyId: Int @sql(type: "INT", index: true)
+  name: String @sql(type: "VARCHAR(170)", unicode: true)
+  model: String @sql(type: "VARCHAR(170)")
+  orderIndex: Int @sql(type: "INT")
+  isManager: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  isDeleted: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+  referenceId: Int
+  instructions: [Instruction!]!
+}
+
+type AgentConversation {
+  agentConversationId: String @sql(type: "BINARY(16)", primary: true)
+  agencyConversationId: String @sql(type: "BINARY(16)", index: true)
+  agentId: Int @sql(type: "INT", index: true)
+  isDeleted: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+  agent: Agent
+  messages: [Message!]!
+}
+
+type AuthToken {
+  authTokenId: String @sql(type: "BINARY(16)", primary: true)
+  agencyVersionId: Int @sql(type: "INT", index: true)
+  name: String @sql(type: "VARCHAR(170)", unicode: true)
+  token: String @sql(type: "VARCHAR(512)")
+  createdByUserId: String @sql(type: "BINARY(16)")
+  dateDeleted: String @sql(type: "TIMESTAMP", nullable: true)
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
+type Block {
+  blockId: String @sql(type: "BINARY(16)", primary: true)
+  instructionId: String @sql(type: "BINARY(16)", index: true)
+  type: String @sql(type: "ENUM('FREEFORM','TO','FROM')")
+  data: JSON @sql(type: "JSON")
+  ordering: Int @sql(type: "INT")
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
+type Viewer {
+  id: String
+  currentUser: User
+  agency(agencyId: Int, lookupId: String): Agency
+}
+
+type Version {
+  version: String @sql(type: "VARCHAR(10)", primary: true)
+  stage: String @sql(type: "VARCHAR(30)", primary: true)
+  isMigrated: Boolean @sql(default: "FALSE")
+  migrationScript: String @sql(type: "MEDIUMTEXT", nullable: true)
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+}
+
+type User {
+  userId: String @sql(type: "BINARY(16)", primary: true)
+  combinedUserId: String @sql(type: "BINARY(16)", index: true)
+  username: String @sql(type: "VARCHAR(40)", unique: true, nullable: true)
+  email: String @sql(type: "VARCHAR(255)", unique: true, nullable: true)
+  isEmailVerified: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  phoneCallingCode: String @sql(type: "VARCHAR(50)", nullable: true)
+  phoneNumber: String @sql(type: "VARCHAR(50)", nullable: true)
+  isPhoneVerified: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  isMfaEnabled: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  gptModels: JSON @sql(type: "JSON")
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+  profilePictureUrl: String
+  maskedOpenAiKey: String
+  isOnboarded: Boolean
+  hasPassword: Boolean
+  hasOpenAiKey: Boolean
+  hasGithubOAuth: Boolean
+  hasGoogleOAuth: Boolean
+  authTokens(agencyId: Int!): [AuthToken!]!
+  agencies: [Agency!]!
+}
+
+type UsageLog {
+  usageLogId: String @sql(type: "BINARY(16)", primary: true)
+  userId: String @sql(type: "BINARY(16)", index: true)
+  projectId: String @sql(type: "BINARY(16)", index: true)
+  """
+  For the GET operations, 
+  it may be possible to query a key which does not exist,
+  in which case, keyValuePairId is null.
+  
+  For DEL operations, the same is true.
+  """
+  keyValuePairId: String @sql(type: "BINARY(16)", index: true, nullable: true)
+  operation: String @sql(type: "ENUM('SET','GET','DEL')")
+  keyByteLength: Int @sql(type: "INT")
+  valueByteLength: Int @sql(type: "INT")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
+type DataTransferLog {
+  dataTransferLogId: String @sql(type: "BINARY(16)", primary: true)
+  clientId: String @sql(type: "BINARY(16)", index: true)
+  connectionId: String @sql(type: "BINARY(16)", index: true)
+  requestId: String @sql(type: "BINARY(16)", index: true)
+  bytesIn: Int @sql(type: "INT")
+  bytesOut: Int @sql(type: "INT")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
+type File {
+  fileId: String @sql(type: "BINARY(16)", primary: true)
+  storedName: String @sql(type: "VARCHAR(100)")
+  metadata: JSON @sql(type: "JSON")
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
+type Instruction {
+  instructionId: String @sql(type: "BINARY(16)", primary: true)
+  agentId: Int @sql(type: "INT", index: true)
+  clause: String @sql(type: "TEXT")
+  orderIndex: Int @sql(type: "INT")
+  canEdit: Boolean @sql(type: "BOOLEAN", default: "TRUE")
+  isDeleted: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
+type MessageData {
+  internalInstruction: Boolean
+  userInstruction: Boolean
+  correctionInstruction: Boolean
+  toApi: Boolean
+  fromApi: Boolean
+  completed: Boolean
+  toAgentId: Int
+  fromAgentId: Int
+  text: String
+  id: String
+}
+
+type Message {
+  messageId: Int @sql(primary: true, auto: true)
+  agentId: Int @sql(type: "INT", index: true)
+  agentConversationId: String @sql(type: "BINARY(16)", index: true)
+  role: String @sql(type: "ENUM('SYSTEM','ASSISTANT','USER')")
+  linkedMessageId: Int @sql(type: "INT", nullable: true)
+  data: MessageData @sql(type: "JSON")
+  dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
+input CreateAccountInput {
+  email: String!
+  password: String!
+}
+
+type CreateAccountResponse {
+  done: Boolean!
+}
+
+input CreateAgencyInput {
+  sessionToken: String!
+  name: String!
+}
+
+type CreateAgencyResponse {
+  success: Boolean!
+  agencyId: Int!
+  lookupId: String!
+  user: User!
+}
+
+input CreateAgentInput {
+  sessionToken: String!
+  agencyId: Int!
+  model: String!
+  name: String!
+  orderIndex: Int!
+  instructions: JSON!
+}
+
+type CreateAgentResponse {
+  success: Boolean!
+  agency: Agency!
+  agentId: Int!
+  viewer: Viewer!
+}
+
+input CreateAuthTokenInput {
+  sessionToken: String!
+  agencyId: Int!
+  name: String!
+}
+
+type CreateAuthTokenResponse {
+  success: Boolean!
+  unmaskedToken: String!
+  user: User!
+}
+
+input DeleteAgencyInput {
+  sessionToken: String!
+  agencyId: Int!
+}
+
+type DeleteAgencyResponse {
+  success: Boolean!
+  viewer: Viewer!
+}
+
+input DeleteAgentInput {
+  sessionToken: String!
+  agentId: Int!
+}
+
+type DeleteAgentResponse {
+  success: Boolean!
+  agency: Agency!
+  viewer: Viewer!
+}
+
+input DeleteAuthTokenInput {
+  sessionToken: String!
+  authTokenId: String!
+}
+
+type DeleteAuthTokenResponse {
+  success: Boolean!
+  user: User!
+}
+
+input GetDemoExampleInput {
+  sessionToken: String!
+  agencyId: Int!
+}
+
+type GetDemoExampleResponse {
+  success: Boolean!
+  exampleHtml: String!
+}
+
+input GetDemoSessionTokenInput {
+  sessionToken: String!
+  agencyId: Int!
+}
+
+type GetDemoSessionTokenResponse {
+  success: Boolean!
+  demoSessionToken: String!
+}
+
+input MergeAccountsInput {
+  currentSessionToken: String!
+  previousSessionToken: String!
+}
+
+type MergeAccountsResponse {
+  success: Boolean!
+  finalSessionToken: String
+  errorAlreadyMerged: Boolean
+}
+
+input SendMfaCodeInput {
+  sessionToken: String!
+  email: String
+  phoneCallingCode: String
+  phoneNumber: String
+}
+
+type SendMfaCodeResponse {
+  success: Boolean!
+}
+
+input TestOpenAiKeyInput {
+  sessionToken: String!
+  openAiKey: String!
+}
+
+type TestOpenAiKeyResponse {
+  success: Boolean!
+}
+
+input UpdateAgencyInput {
+  sessionToken: String!
+  agencyId: Int!
+  agents: JSON
+}
+
+type UpdateAgencyResponse {
+  success: Boolean!
+  agency: Agency!
+}
+
+input UpdateAgentInput {
+  sessionToken: String!
+  agentId: Int!
+  agencyId: Int!
+  name: String!
+  model: String!
+  orderIndex: Int!
+  instructions: JSON!
+}
+
+type UpdateAgentResponse {
+  success: Boolean!
+  agency: Agency!
+  viewer: Viewer!
+}
+
+input UpdateSettingsInput {
+  sessionToken: String!
+  username: String
+  openAiKey: String
+  useTrialKey: Boolean
+  email: String
+  phoneCallingCode: String
+  phoneNumber: String
+  isMfaEnabled: Boolean
+  mfaToken: String
+  password: String
+}
+
+type UpdateSettingsResponse {
+  user: User
+  viewer: Viewer
+}
+
+input VerifyMfaCodeInput {
+  userId: String!
+  code: String!
+}
+
+type VerifyMfaCodeResponse {
+  success: Boolean!
+  mfaToken: String!
+}
+
+input VerifyPasswordInput {
+  email: String!
+  password: String!
+}
+
+type VerifyPasswordResponse {
+  success: Boolean!
+  userId: String
+  passwordToken: String
+  isMfaNeeded: Boolean
+  mfaPhoneCallingCode: String
+  mfaPhoneNumber: String
+}
+
+type PaginationInfo {
+  hasMore: Boolean!
+  hasNew: Boolean!
+  countNew: Int!
+  moreOffset: Int!
+  nextOffsetRelativeTo: String!
+}
+
+input PaginationOrdering {
+  index: String!
+  direction: String!
+}

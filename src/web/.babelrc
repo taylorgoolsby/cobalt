@@ -1,0 +1,19 @@
+{
+  "presets": [
+    "@babel/preset-env",
+    "@babel/preset-flow",
+    "@babel/preset-react",
+    "next/babel"
+  ],
+  "plugins": [
+    ["prismjs", {
+      "languages": ["bash", "python", "javascript", "html", "css", "typescript"],
+      "plugins": ["line-numbers"],
+      "theme": "tomorrow",
+      "css": true
+    }],
+    "@babel/plugin-transform-runtime",
+    ["@babel/plugin-proposal-decorators", { "legacy": true }],
+    ["@babel/plugin-proposal-class-properties", { "loose": false }]
+  ]
+}
