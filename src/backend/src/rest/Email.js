@@ -14,10 +14,16 @@ export default class Email {
     subjectProps: S,
     bodyProps: B,
   ) {
-    if (Config.isProd) {
+    if (Config.isProd && Config.postmarkKey && Config.emailFromAddress) {
       await PostmarkRest.buildAndSend(template, to, subjectProps, bodyProps)
-    } else {
+    } else if (
+      Config.mailgunKey &&
+      Config.mailgunDomain &&
+      Config.emailFromAddress
+    ) {
       await MailgunRest.buildAndSend(template, to, subjectProps, bodyProps)
+    } else {
+      console.error('Email service environment variables are not configured.')
     }
   }
 

@@ -14,8 +14,6 @@ import sessionStore from '../stores/SessionStore.js'
 import UpdateSettings from '../graphql/mutation/UpdateSettingsMutation.js'
 import nonMaybe from 'non-maybe'
 import Colors from '../Colors.js'
-import ToggleField from '../components/ToggleField.js'
-import FormSection from '../components/FormSection.js'
 import reportEvent from '../utils/reportEvent.js'
 
 const styles = {
@@ -68,33 +66,19 @@ const Onboarding: any = () => {
     reportEvent('onboarding load', {})
   }, [])
 
-  const [username, setUsername] = useState('')
-  const [openAiKey, setOpenAiKey] = useState('')
-  const [useTrialKey, setUseTrialKey] = useState(true)
+  const [apiBase, setApiBase] = useState('')
+  const [apiKey, setApiKey] = useState('')
   const [inFlight, setInFlight] = useState(false)
-  const res = useQuery(GetCurrentUser, {
-    variables: {
-      sessionToken: sessionStore.sessionToken,
-    },
-  })
-  const userId = res.data?.viewer?.currentUser?.userId
 
-  function handleOpenAiKeyChange(e: any) {
-    setOpenAiKey(e.target.value.trim())
+  function handleApiKeyChange(e: any) {
+    setApiKey(e.target.value)
   }
 
-  function handleUsernameChange(e: any) {
-    setUsername(e.target.value)
+  function handleApiBaseChange(e: any) {
+    setApiBase(e.target.value)
   }
 
-  function handleToggleUseTrialKey() {
-    setUseTrialKey(!useTrialKey)
-    if (!useTrialKey) {
-      setOpenAiKey('')
-    }
-  }
-
-  const disabled = !username || (!openAiKey && !useTrialKey)
+  const disabled = !apiBase || inFlight
   function submitChanges() {
     if (disabled) {
       return
@@ -102,9 +86,8 @@ const Onboarding: any = () => {
     setInFlight(true)
     UpdateSettings({
       sessionToken: nonMaybe(sessionStore.sessionToken),
-      username,
-      openAiKey: useTrialKey ? null : openAiKey,
-      useTrialKey,
+      apiBase,
+      apiKey,
     }).then(async (res) => {
       reportEvent('onboarding complete', {})
       setInFlight(false)
@@ -115,43 +98,24 @@ const Onboarding: any = () => {
     <Body className={styles.page}>
       <Form className={styles.form}>
         <LineBreak />
-        <Text>
-          {'Please give yourself a name and enter your OpenAI API Key.'}
-        </Text>
+        <Text>{'Please enter the details of your inference server.'}</Text>
         <LineBreak />
         <TextField
           className={'text-field name-field'}
-          label={'Name'}
-          value={username}
-          onInput={handleUsernameChange}
+          label={'API Base URL'}
+          value={apiBase}
+          onInput={handleApiBaseChange}
           onEnterPress={submitChanges}
           autoFocus
         />
-        <LineBreak />
-        <FormSection className={'form-section'} label={'OpenAI API Key'}>
-          <Text>
-            {
-              'If you do not have your own OpenAI API Key, you can use the trial key. Usage will be limited to a single agency, 3 agents using GPT-3.5, and no permanent API access.'
-            }
-          </Text>
-          <LineBreak />
-          <ToggleField
-            label={useTrialKey ? 'Using Trial Key' : 'Bringing Your Own Key'}
-            value={useTrialKey}
-            onChange={handleToggleUseTrialKey}
-          />
-          <LineBreak />
-          <TextField
-            className={'text-field'}
-            label={'You API Key'}
-            value={openAiKey}
-            onInput={handleOpenAiKeyChange}
-            onEnterPress={submitChanges}
-            type={'password'}
-            disabled={useTrialKey}
-          />
-        </FormSection>
-
+        <TextField
+          className={'text-field name-field'}
+          label={'API Key (Optional)'}
+          value={apiKey}
+          onInput={handleApiKeyChange}
+          onEnterPress={submitChanges}
+          autoFocus
+        />
         <LineBreak />
         <ButtonSquared
           type={'submit'}

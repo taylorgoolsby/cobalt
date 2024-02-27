@@ -37,7 +37,7 @@ async function query(queryObject: {
     await importPool()
   }
 
-  // console.debug(mysql.format(queryObject.sql, queryObject.values))
+  console.debug(mysql.format(queryObject.sql, queryObject.values))
 
   const res = await new Promise((resolve, reject) => {
     _pool.query(queryObject, (err, res) => {

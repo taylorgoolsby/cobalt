@@ -53,6 +53,9 @@ export async function resolver(
   } else {
     const hashedPassword = await Security.hashPassword('the wizard of oz')
     userId = await UserInterface.insert('default@example.com', hashedPassword)
+    await UserInterface.updateSettings(userId, {
+      username: 'default',
+    })
   }
 
   const passwordToken = await createPasswordToken(userId, email)

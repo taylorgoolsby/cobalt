@@ -7,7 +7,6 @@ import type { TokenResGoogle } from '../../rest/GoogleRest.js'
 import gql from 'graphql-tag'
 import resolver from '../../utils/resolver.js'
 import AgencyInterface from '../Agency/AgencyInterface.js'
-import ChatGPTRest from '../../rest/ChatGPTRest.js'
 import AuthTokenInterface from '../AuthToken/AuthTokenInterface.js'
 import type { AuthTokenSQL } from '../AuthToken/AuthTokenSchema.js'
 
@@ -38,6 +37,12 @@ export type UserSQL = {|
   oauthIdGithub: ?string,
   oauthIdGoogle: ?string,
   openAiKey: ?string,
+  inferenceServerConfig: {
+    // This tries to conform to the naming scheme used by continue.dev config: https://continue.dev/docs/reference/Model%20Providers/openai
+    apiBase?: ?string,
+    apiKey?: ?string,
+    completionOptions?: ?{ ... },
+  },
   gptModels: Array<string>,
   dateUpdated: string,
   dateCreated: string,
@@ -74,6 +79,7 @@ export const typeDefs: any = gql`
         nullable: true
       )
     openAiKey: String @sql(type: "VARCHAR(256)", nullable: true) @private
+    inferenceServerConfig: JSON @sql(type: "JSON")
     gptModels: JSON @sql(type: "JSON")
     dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
     dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
@@ -166,8 +172,14 @@ export const resolvers: ResolverDefs = {
       if (ctx.session.userId !== user.userId) {
         return null
       }
-      console.log('user', user)
-      return !!user.username && !!user.openAiKey
+      // The user is considered to be onboarded when they have specified an apiBase for their inference server,
+      // Examples:
+      // http://localhost:1234
+      // https://my-azure-openai-instance.openai.azure.com/
+      // https://api.openai.com
+      // It may or may not end with a trailing slash. We will normalize it and store it in DB with no trailing slash.
+      // They must specify the protocol, but we check if it is http or https.
+      return !!user.inferenceServerConfig?.apiBase
     }),
     hasPassword: resolver(async (user: UserSQL, args, ctx) => {
       if (!ctx.isAuthenticated) {

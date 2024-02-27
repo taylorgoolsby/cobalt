@@ -15,6 +15,8 @@ import Email from '../rest/Email.js'
 
 type UpdateSettingsInput = {
   sessionToken: string,
+  apiBase?: ?string,
+  apiKey?: ?string,
   username?: ?string,
   openAiKey?: ?string,
   useTrialKey?: ?boolean,
@@ -34,6 +36,8 @@ type UpdateSettingsResponse = {
 export const typeDefs: any = gql`
   input UpdateSettingsInput {
     sessionToken: String!
+    apiBase: String
+    apiKey: String
     username: String
     openAiKey: String
     useTrialKey: Boolean
@@ -59,16 +63,18 @@ export async function resolver(
   try {
     const {
       sessionToken,
-      username,
-      openAiKey,
-      useTrialKey,
-      email,
-      phoneCallingCode,
-      phoneNumber,
-      isMfaEnabled,
-      mfaToken,
-      password,
+      apiKey,
+      // username,
+      // openAiKey,
+      // useTrialKey,
+      // email,
+      // phoneCallingCode,
+      // phoneNumber,
+      // isMfaEnabled,
+      // mfaToken,
+      // password,
     } = args.input
+    let apiBase = args.input.apiBase
     const session = await unpackSession(sessionToken, ctx)
 
     const existingUser = await UserInterface.getUser(session.userId)
@@ -76,95 +82,113 @@ export async function resolver(
       throw new Error('User does not exist.')
     }
 
-    let hashedPassword: ?string = password === null ? null : undefined
-    if (password) {
-      hashedPassword = await Security.hashPassword(password)
-    }
+    // let hashedPassword: ?string = password === null ? null : undefined
+    // if (password) {
+    //   hashedPassword = await Security.hashPassword(password)
+    // }
+    //
+    // if (phoneCallingCode || phoneNumber) {
+    //   const phoneChanged =
+    //     existingUser.phoneCallingCode !== phoneCallingCode ||
+    //     existingUser.phoneNumber !== phoneNumber
+    //   if (phoneChanged) {
+    //     if (!isMfaEnabled) {
+    //       throw new Error(
+    //         'If phone number is provided, then mfa should be enabled.',
+    //       )
+    //     }
+    //     if (!Phone.isValid(phoneCallingCode, phoneNumber)) {
+    //       throw new Error('The provided phone number is invalid.')
+    //     }
+    //     if (!mfaToken) {
+    //       throw new Error(
+    //         'An mfaToken must be provided to verify phone number.',
+    //       )
+    //     }
+    //     const unpackedToken = await unpackMfaToken(mfaToken)
+    //     if (
+    //       !(
+    //         unpackedToken.userId === session.userId &&
+    //         unpackedToken.phoneCallingCode === phoneCallingCode &&
+    //         unpackedToken.phoneNumber === phoneNumber
+    //       )
+    //     ) {
+    //       throw new Error('The phone number has not been verified.')
+    //     }
+    //   }
+    // }
+    //
+    // if (email === null) {
+    //   throw new Error('Email cannot be deleted.')
+    // }
+    // if (email) {
+    //   const emailChanged = existingUser.email !== email
+    //   if (emailChanged) {
+    //     const isEmailValid = validator.isEmail(email)
+    //     if (!isEmailValid) {
+    //       throw new Error('Email is not valid.')
+    //     }
+    //     if (!mfaToken) {
+    //       throw new Error('An mfaToken must be provided to verify email.')
+    //     }
+    //     const unpackedToken = await unpackMfaToken(mfaToken)
+    //     if (
+    //       !(
+    //         unpackedToken.userId === session.userId &&
+    //         unpackedToken.email === email
+    //       )
+    //     ) {
+    //       throw new Error('The email has not been verified.')
+    //     }
+    //   }
+    // }
 
-    if (phoneCallingCode || phoneNumber) {
-      const phoneChanged =
-        existingUser.phoneCallingCode !== phoneCallingCode ||
-        existingUser.phoneNumber !== phoneNumber
-      if (phoneChanged) {
-        if (!isMfaEnabled) {
-          throw new Error(
-            'If phone number is provided, then mfa should be enabled.',
-          )
-        }
-        if (!Phone.isValid(phoneCallingCode, phoneNumber)) {
-          throw new Error('The provided phone number is invalid.')
-        }
-        if (!mfaToken) {
-          throw new Error(
-            'An mfaToken must be provided to verify phone number.',
-          )
-        }
-        const unpackedToken = await unpackMfaToken(mfaToken)
-        if (
-          !(
-            unpackedToken.userId === session.userId &&
-            unpackedToken.phoneCallingCode === phoneCallingCode &&
-            unpackedToken.phoneNumber === phoneNumber
-          )
-        ) {
-          throw new Error('The phone number has not been verified.')
-        }
-      }
-    }
+    // if (openAiKey) {
+    //   // If this call does not error out, then the key is good.
+    //   const models = await ChatGPTRest.getAvailableModels(openAiKey)
+    //   await UserInterface.updateGptModels(session.userId, models)
+    // } else if (useTrialKey) {
+    //   if (openAiKey !== null && openAiKey !== undefined) {
+    //     throw new Error('openAiKey should be null when useTrialKey is true.')
+    //   }
+    //   const models = await ChatGPTRest.getAvailableModels(
+    //     Config.openAiPublicTrialKey,
+    //   )
+    //   await UserInterface.updateGptModels(session.userId, models)
+    // }
 
-    if (email === null) {
-      throw new Error('Email cannot be deleted.')
-    }
-    if (email) {
-      const emailChanged = existingUser.email !== email
-      if (emailChanged) {
-        const isEmailValid = validator.isEmail(email)
-        if (!isEmailValid) {
-          throw new Error('Email is not valid.')
-        }
-        if (!mfaToken) {
-          throw new Error('An mfaToken must be provided to verify email.')
-        }
-        const unpackedToken = await unpackMfaToken(mfaToken)
-        if (
-          !(
-            unpackedToken.userId === session.userId &&
-            unpackedToken.email === email
-          )
-        ) {
-          throw new Error('The email has not been verified.')
-        }
-      }
-    }
+    // await UserInterface.updateSettings(session.userId, {
+    //   username,
+    //   openAiKey:
+    //     useTrialKey || openAiKey
+    //       ? useTrialKey
+    //         ? Config.openAiPublicTrialKey
+    //         : openAiKey
+    //       : undefined,
+    //   email,
+    //   phoneCallingCode,
+    //   phoneNumber,
+    //   isMfaEnabled,
+    //   hashedPassword,
+    // })
 
-    if (openAiKey) {
-      // If this call does not error out, then the key is good.
-      const models = await ChatGPTRest.getAvailableModels(openAiKey)
-      await UserInterface.updateGptModels(session.userId, models)
-    } else if (useTrialKey) {
-      if (openAiKey !== null && openAiKey !== undefined) {
-        throw new Error('openAiKey should be null when useTrialKey is true.')
+    if (!!apiBase) {
+      // Ensure URL starts with http:// or https://
+      if (!apiBase.match(/^https?:\/\//)) {
+        throw new Error('API base must start with http:// or https://')
       }
-      const models = await ChatGPTRest.getAvailableModels(
-        Config.openAiPublicTrialKey,
-      )
-      await UserInterface.updateGptModels(session.userId, models)
+
+      // Remove trailing slash if there is one:
+      apiBase = apiBase.replace(/\/$/, '')
     }
 
     await UserInterface.updateSettings(session.userId, {
-      username,
-      openAiKey:
-        useTrialKey || openAiKey
-          ? useTrialKey
-            ? Config.openAiPublicTrialKey
-            : openAiKey
-          : undefined,
-      email,
-      phoneCallingCode,
-      phoneNumber,
-      isMfaEnabled,
-      hashedPassword,
+      inferenceServerConfig: {
+        apiBase,
+        apiKey,
+      },
     })
+
     const updatedUser = await UserInterface.getUser(session.userId)
 
     if (!existingUser.username && !!updatedUser?.username) {

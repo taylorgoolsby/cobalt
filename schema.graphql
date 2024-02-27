@@ -146,6 +146,7 @@ type User {
   phoneNumber: String @sql(type: "VARCHAR(50)", nullable: true)
   isPhoneVerified: Boolean @sql(type: "BOOLEAN", default: "FALSE")
   isMfaEnabled: Boolean @sql(type: "BOOLEAN", default: "FALSE")
+  inferenceServerConfig: JSON @sql(type: "JSON")
   gptModels: JSON @sql(type: "JSON")
   dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
   dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
@@ -406,6 +407,8 @@ type UpdateAgentResponse {
 
 input UpdateSettingsInput {
   sessionToken: String!
+  apiBase: String
+  apiKey: String
   username: String
   openAiKey: String
   useTrialKey: Boolean

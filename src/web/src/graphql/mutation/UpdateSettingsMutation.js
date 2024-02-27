@@ -8,6 +8,8 @@ import reportEvent from '../../utils/reportEvent.js'
 
 export type UpdateSettingsInput = {
   sessionToken: string,
+  apiBase?: ?string,
+  apiKey?: ?string,
   username?: ?string,
   openAiKey?: ?string,
   useTrialKey?: ?boolean,
