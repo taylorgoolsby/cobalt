@@ -18,8 +18,9 @@ import Link from '../components/Link.js'
 import useHistory from '../utils/useHistory.js'
 import reportEvent from '../utils/reportEvent.js'
 import OfflineCreateOrStartUser from '../graphql/mutation/OfflineCreateOrStartUser.js'
-import { showErrorModal } from '../modals/ErrorModal.js'
 import sessionStore from '../stores/SessionStore.js'
+import CreateAgencyMutation from '../graphql/mutation/CreateAgencyMutation.js'
+import nonMaybe from 'non-maybe'
 
 const styles = {
   page: css`
@@ -135,6 +136,11 @@ const Landing: any = observer(() => {
                   passwordToken: res.passwordToken,
                 })
               if (sessionTokenObtained) {
+                await CreateAgencyMutation({
+                  sessionToken: nonMaybe(sessionStore.sessionToken),
+                  name: 'Default Agency',
+                })
+
                 history?.push('/app')
               }
             }

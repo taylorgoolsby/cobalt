@@ -19,6 +19,7 @@ import GetCurrentUser from '../graphql/GetCurrentUser.js'
 import AgencyList from '../components/AgencyList.js'
 import Settings from './Settings.js'
 import Colors from '../Colors.js'
+import type { Agency } from '../types/Agency.js'
 
 export const orderings = [
   { index: 'dateCreated', direction: 'desc' },
@@ -38,7 +39,16 @@ const styles = {
 }
 
 const AgencySwitch = observer(() => {
-  const { lookupId } = useParams()
+  const agencyListRes = useQuery(GetAgencies, {
+    variables: {
+      sessionToken: sessionStore.sessionToken,
+    },
+  })
+  const agencies: Array<Agency> =
+    agencyListRes?.data?.viewer?.currentUser?.agencies ?? []
+
+  // const { lookupId } = useParams()
+  const lookupId = agencies[0]?.lookupId
 
   const preliminaryRes = useQuery(lookupId ? GetAgency : GetAgencies, {
     variables: {
@@ -118,41 +128,55 @@ const AgencySwitch = observer(() => {
 
   return (
     <Switch>
+      {/*<Route*/}
+      {/*  exact*/}
+      {/*  path={'/app/agency/:lookupId/instruct'}*/}
+      {/*  render={() => {*/}
+      {/*    return (*/}
+      {/*      <AgencyInstruct*/}
+      {/*        key={'Instruct'}*/}
+      {/*        className={'main-panel'}*/}
+      {/*        agency={agency}*/}
+      {/*        currentUser={currentUser}*/}
+      {/*      />*/}
+      {/*    )*/}
+      {/*  }}*/}
+      {/*/>*/}
+      {/*<Route*/}
+      {/*  exact*/}
+      {/*  path={'/app/agency/:lookupId/interact'}*/}
+      {/*  render={() => {*/}
+      {/*    return (*/}
+      {/*      <AgencyInteract*/}
+      {/*        key={'Interact'}*/}
+      {/*        className={'main-panel'}*/}
+      {/*        agency={agency}*/}
+      {/*        currentUser={currentUser}*/}
+      {/*      />*/}
+      {/*    )*/}
+      {/*  }}*/}
+      {/*/>*/}
+      {/*<Route*/}
+      {/*  exact*/}
+      {/*  path={'/app/agency/:lookupId/publish'}*/}
+      {/*  render={() => {*/}
+      {/*    return (*/}
+      {/*      <AgencyPublish*/}
+      {/*        key={'Publish'}*/}
+      {/*        className={'main-panel'}*/}
+      {/*        agency={agency}*/}
+      {/*        currentUser={currentUser}*/}
+      {/*      />*/}
+      {/*    )*/}
+      {/*  }}*/}
+      {/*/>*/}
       <Route
         exact
-        path={'/app/agency/:lookupId/instruct'}
-        render={() => {
-          return (
-            <AgencyInstruct
-              key={'Instruct'}
-              className={'main-panel'}
-              agency={agency}
-              currentUser={currentUser}
-            />
-          )
-        }}
-      />
-      <Route
-        exact
-        path={'/app/agency/:lookupId/interact'}
+        path={'/app'}
         render={() => {
           return (
             <AgencyInteract
               key={'Interact'}
-              className={'main-panel'}
-              agency={agency}
-              currentUser={currentUser}
-            />
-          )
-        }}
-      />
-      <Route
-        exact
-        path={'/app/agency/:lookupId/publish'}
-        render={() => {
-          return (
-            <AgencyPublish
-              key={'Publish'}
               className={'main-panel'}
               agency={agency}
               currentUser={currentUser}
@@ -167,11 +191,11 @@ const AgencySwitch = observer(() => {
 const Home: any = observer(() => {
   return (
     <Body className={styles.page}>
-      <AgencyList />
+      {/*<AgencyList />*/}
       <Switch>
-        <Route exact path={'/app'} component={AgencySwitch} />
         <Route exact path={'/app/settings'} component={Settings} />
-        <Route path={'/app/agency/:lookupId'} component={AgencySwitch} />
+        <Route exact path={'/app'} component={AgencySwitch} />
+        {/*<Route path={'/app/agency/:lookupId'} component={AgencySwitch} />*/}
       </Switch>
     </Body>
   )

@@ -12,6 +12,12 @@ export type User = {
   phoneNumber?: ?string,
   isPhoneVerified?: boolean,
   isMfaEnabled?: boolean,
+  inferenceServerConfig: {
+    // This tries to conform to the naming scheme used by continue.dev config: https://continue.dev/docs/reference/Model%20Providers/openai
+    apiBase?: ?string,
+    apiKey?: ?string,
+    completionOptions?: ?{ ... },
+  },
   gptModels?: Array<string>,
   dateUpdated?: number,
   dateCreated?: number,

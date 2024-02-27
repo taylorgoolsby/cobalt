@@ -62,6 +62,7 @@ const UpdateSettingsMutation: any = gql`
         phoneNumber
         isPhoneVerified
         isMfaEnabled
+        inferenceServerConfig
         dateUpdated
         dateCreated
 

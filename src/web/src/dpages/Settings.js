@@ -6,7 +6,11 @@ import Body from '../components/Body.js'
 import { css } from 'goober'
 import Form from '../components/Form.js'
 import TextField, { textFieldClassName } from '../components/TextField.js'
-import { ButtonSquared, buttonStyles } from '../components/Button.js'
+import {
+  ButtonSquared,
+  buttonStyles,
+  CloseButton,
+} from '../components/Button.js'
 import LineBreak from '../components/LineBreak.js'
 import apolloClient from '../apolloClient.js'
 import GetCurrentUser from '../graphql/GetCurrentUser.js'
@@ -14,10 +18,7 @@ import sessionStore from '../stores/SessionStore.js'
 import SpinnerModal from '../modals/SpinnerModal.js'
 import UpdateSettings from '../graphql/mutation/UpdateSettingsMutation.js'
 import nonMaybe from 'non-maybe'
-import PhoneField from '../components/PhoneField.js'
 import classnames from 'classnames'
-import ToggleField from '../components/ToggleField.js'
-import FormSection from '../components/FormSection.js'
 import Colors from '../Colors.js'
 import Link from '../components/Link.js'
 import Text from '../components/Text.js'
@@ -27,9 +28,8 @@ import PasswordWizard from '../wizards/PasswordWizard.js'
 import type { UpdateSettingsInput } from '../graphql/mutation/UpdateSettingsMutation.js'
 import AddEmailWizard from '../wizards/AddEmailWizard.js'
 import LoginWizard from '../wizards/LoginWizard.js'
-import ProfilePictureField from '../components/ProfilePictureField.js'
 import ChangeOpenAiKeyWizard from '../wizards/ChangeOpenAiKeyWizard.js'
-import View from '../components/View.js'
+import { getHistory } from '../utils/history.js'
 
 const styles = {
   page: css`
@@ -46,6 +46,42 @@ const styles = {
 
     .${textFieldClassName} {
       width: auto;
+    }
+
+    .close-settings-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      min-width: 120px;
+      max-width: 282px;
+      height: 34px;
+      min-height: 34px;
+      padding: 0 16px;
+      border-radius: 4px;
+      background-color: transparent;
+
+      > span {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        min-width: 0;
+        /*font-family: 'Sometype Mono', monospace;*/
+        /*opacity: 0.3;*/
+        font-size: 16px;
+      }
+
+      &:hover:not([disabled='']):not([disabled='true']):not(
+          [data-small='true']
+        ) {
+        background-color: rgba(255, 255, 255, 0.22);
+        /*background-color: ${Colors.blackSoftest};*/
+      }
     }
   `,
   form: css`
@@ -82,6 +118,8 @@ type State = {
   hasPassword: boolean,
   hasOpenAiKey: boolean,
   password: ?string,
+  apiBase: ?string,
+  apiKey: ?string,
   showChangeOpenAiKeyWizardModal: boolean,
   showPasswordWizardModal: boolean,
   showAddEmailWizardModal: boolean,
@@ -112,6 +150,8 @@ class Settings extends Component<any, State> {
       hasPassword: false,
       hasOpenAiKey: false,
       password: null,
+      apiBase: '',
+      apiKey: '',
       showChangeOpenAiKeyWizardModal: false,
       showPasswordWizardModal: false,
       showAddEmailWizardModal: false,
@@ -160,6 +200,8 @@ class Settings extends Component<any, State> {
       hasPassword: !!currentUser.hasPassword,
       hasOpenAiKey: !!currentUser.hasOpenAiKey,
       password: null,
+      apiBase: currentUser.inferenceServerConfig?.apiBase ?? '',
+      apiKey: currentUser.inferenceServerConfig?.apiKey ?? '',
     })
   }
 
@@ -174,7 +216,9 @@ class Settings extends Component<any, State> {
       this.serverData?.isMfaEnabled !== this.state.isMfaEnabled ||
       this.serverData?.hasPassword !== this.state.hasPassword ||
       this.state.password || // This has a value when password wizard exits
-      this.state.openAiKey
+      this.state.openAiKey ||
+      this.serverData?.inferenceServerConfig?.apiBase !== this.state.apiBase ||
+      this.serverData?.inferenceServerConfig?.apiKey !== this.state.apiKey
     ) {
       return true
     }
@@ -289,6 +333,18 @@ class Settings extends Component<any, State> {
     })
   }
 
+  handleApiBaseChange: any = (e: any) => {
+    this.setState({
+      apiBase: e.target.value,
+    })
+  }
+
+  handleApiKeyChange: any = (e: any) => {
+    this.setState({
+      apiKey: e.target.value,
+    })
+  }
+
   setShowAddPhoneWizardModal: any = (value: boolean) => {
     this.setState({
       showAddPhoneWizardModal: value,
@@ -310,6 +366,8 @@ class Settings extends Component<any, State> {
     const input: UpdateSettingsInput = {
       sessionToken: nonMaybe(sessionStore.sessionToken),
       username: this.state.username,
+      apiBase: this.state.apiBase,
+      apiKey: this.state.apiKey,
     }
 
     const changingOpenAiKey =
@@ -534,6 +592,8 @@ class Settings extends Component<any, State> {
   render(): any {
     const {
       username,
+      apiBase,
+      apiKey,
       openAiKey,
       maskedOpenAiKey,
       email,
@@ -554,154 +614,174 @@ class Settings extends Component<any, State> {
 
     const isMfaMethodVerified = mfaMethod === 'Email' || mfaMethod === 'Phone'
 
+    const history = getHistory()
+
     return (
       <Body className={styles.page}>
         <Form className={styles.form}>
           {/*<LineBreak />*/}
           {/*<LineBreak />*/}
           {/*<ProfilePictureField src={null} onSourceChange={null} />*/}
-          <LineBreak />
-          <LineBreak />
-          <TextField
-            label={'Username'}
-            value={username}
-            onInput={this.handleUsernameChange}
-          />
-          <LineBreak />
-          <LineBreak />
-          <FormSection label={'OpenAI API Key'}>
-            <TextField value={maskedOpenAiKey} disabled />
-            <LineBreak />
-            <ButtonSquared
-              className={styles.button}
-              onClick={() => {
-                this.setState({
-                  showChangeOpenAiKeyWizardModal: true,
-                })
-              }}
-            >
-              Change
-            </ButtonSquared>
-            {this.renderChangeOpenAiKeyWizardModal()}
-          </FormSection>
-          <LineBreak />
-          <LineBreak />
-          <FormSection label={'Email'}>
-            <TextField
-              value={email}
-              onInput={this.handleEmailChange}
-              disabled={isEmailSyncedToOAuth}
-            />
-            <LineBreak />
-            <ButtonSquared
-              className={styles.button}
-              onClick={() => {
-                this.setState({
-                  showAddEmailWizardModal: true,
-                })
-              }}
-            >
-              Change
-            </ButtonSquared>
-            {this.renderAddEmailWizardModal()}
-          </FormSection>
+          {/*<LineBreak />*/}
+          {/*<LineBreak />*/}
+          {/*<TextField*/}
+          {/*  label={'Username'}*/}
+          {/*  value={username}*/}
+          {/*  onInput={this.handleUsernameChange}*/}
+          {/*/>*/}
+          {/*<LineBreak />*/}
+          {/*<LineBreak />*/}
+          {/*<FormSection label={'OpenAI API Key'}>*/}
+          {/*  <TextField value={maskedOpenAiKey} disabled />*/}
+          {/*  <LineBreak />*/}
+          {/*  <ButtonSquared*/}
+          {/*    className={styles.button}*/}
+          {/*    onClick={() => {*/}
+          {/*      this.setState({*/}
+          {/*        showChangeOpenAiKeyWizardModal: true,*/}
+          {/*      })*/}
+          {/*    }}*/}
+          {/*  >*/}
+          {/*    Change*/}
+          {/*  </ButtonSquared>*/}
+          {/*  {this.renderChangeOpenAiKeyWizardModal()}*/}
+          {/*</FormSection>*/}
+          {/*<LineBreak />*/}
+          {/*<LineBreak />*/}
+          {/*<FormSection label={'Email'}>*/}
+          {/*  <TextField*/}
+          {/*    value={email}*/}
+          {/*    onInput={this.handleEmailChange}*/}
+          {/*    disabled={isEmailSyncedToOAuth}*/}
+          {/*  />*/}
+          {/*  <LineBreak />*/}
+          {/*  <ButtonSquared*/}
+          {/*    className={styles.button}*/}
+          {/*    onClick={() => {*/}
+          {/*      this.setState({*/}
+          {/*        showAddEmailWizardModal: true,*/}
+          {/*      })*/}
+          {/*    }}*/}
+          {/*  >*/}
+          {/*    Change*/}
+          {/*  </ButtonSquared>*/}
+          {/*  {this.renderAddEmailWizardModal()}*/}
+          {/*</FormSection>*/}
           {/*<ul>*/}
           {/*  {this.renderVerificationListItem(*/}
           {/*    isEmailVerified,*/}
           {/*    this.resendEmailVerification,*/}
           {/*  )}*/}
           {/*</ul>*/}
+          {/*<LineBreak />*/}
+          {/*<LineBreak />*/}
+          {/*<FormSection label={'Sign In With Password'}>*/}
+          {/*  <ToggleField*/}
+          {/*    label={hasPassword ? 'Activated' : 'Deactivated'}*/}
+          {/*    value={hasPassword}*/}
+          {/*    onChange={this.handlePasswordToggle}*/}
+          {/*  />*/}
+          {/*  {this.serverData?.hasPassword && hasPassword ? (*/}
+          {/*    <>*/}
+          {/*      <LineBreak />*/}
+          {/*      <ButtonSquared*/}
+          {/*        className={styles.button}*/}
+          {/*        onClick={() => this.setShowPasswordWizardModal(true)}*/}
+          {/*      >*/}
+          {/*        Change*/}
+          {/*      </ButtonSquared>*/}
+          {/*    </>*/}
+          {/*  ) : null}*/}
+          {/*  {this.serverData?.hasPassword && !hasPassword ? (*/}
+          {/*    <>*/}
+          {/*      <LineBreak />*/}
+          {/*      <ul>*/}
+          {/*        <li>*/}
+          {/*          <Text>*/}
+          {/*            {`You will no longer be able to sign in using password.`}*/}
+          {/*          </Text>*/}
+          {/*        </li>*/}
+          {/*      </ul>*/}
+          {/*    </>*/}
+          {/*  ) : null}*/}
+          {/*  {this.renderPasswordWizardModal()}*/}
+          {/*</FormSection>*/}
+          {/*<LineBreak />*/}
+          {/*<LineBreak />*/}
+          {/*<FormSection label={'2-Step Verification'}>*/}
+          {/*  <ToggleField*/}
+          {/*    label={isMfaEnabled ? 'Activated' : 'Deactivated'}*/}
+          {/*    value={isMfaEnabled}*/}
+          {/*    onChange={this.handleMfaToggle}*/}
+          {/*  />*/}
+          {/*  {isMfaEnabled &&*/}
+          {/*  mfaMethod === 'Phone' &&*/}
+          {/*  phoneCallingCode &&*/}
+          {/*  phoneNumber ? (*/}
+          {/*    <>*/}
+          {/*      {this.serverData?.isMfaEnabled ? (*/}
+          {/*        <>*/}
+          {/*          <LineBreak />*/}
+          {/*          <ButtonSquared*/}
+          {/*            className={styles.button}*/}
+          {/*            onClick={() => this.setShowAddPhoneWizardModal(true)}*/}
+          {/*          >*/}
+          {/*            Change*/}
+          {/*          </ButtonSquared>*/}
+          {/*        </>*/}
+          {/*      ) : null}*/}
+          {/*      <LineBreak />*/}
+          {/*      <PhoneField*/}
+          {/*        label={'Phone'}*/}
+          {/*        callingCode={phoneCallingCode}*/}
+          {/*        onCallingCodeChange={this.handlePhoneCallingCodeChange}*/}
+          {/*        phoneNumber={phoneNumber}*/}
+          {/*        onPhoneNumberChange={this.handlePhoneNumberChange}*/}
+          {/*        onValidityChange={this.handlePhoneValidityChange}*/}
+          {/*        disabled*/}
+          {/*      />*/}
+          {/*      <LineBreak />*/}
+          {/*      <ul>*/}
+          {/*        <li>*/}
+          {/*          <Text>*/}
+          {/*            {`When using password to sign in, a 6-digit code will be sent to your ${mfaMethod.toLowerCase()}.`}*/}
+          {/*          </Text>*/}
+          {/*        </li>*/}
+          {/*      </ul>*/}
+          {/*    </>*/}
+          {/*  ) : null}*/}
+          {/*  {this.serverData?.isMfaEnabled && !isMfaEnabled ? (*/}
+          {/*    <>*/}
+          {/*      <LineBreak />*/}
+          {/*      <ul>*/}
+          {/*        <li>*/}
+          {/*          <Text>*/}
+          {/*            {`When using password to sign in, a 6-digit code will no longer be required.`}*/}
+          {/*          </Text>*/}
+          {/*        </li>*/}
+          {/*      </ul>*/}
+          {/*    </>*/}
+          {/*  ) : null}*/}
+          {/*  {this.renderAddPhoneWizardModal()}*/}
+          {/*</FormSection>*/}
           <LineBreak />
           <LineBreak />
-          <FormSection label={'Sign In With Password'}>
-            <ToggleField
-              label={hasPassword ? 'Activated' : 'Deactivated'}
-              value={hasPassword}
-              onChange={this.handlePasswordToggle}
-            />
-            {this.serverData?.hasPassword && hasPassword ? (
-              <>
-                <LineBreak />
-                <ButtonSquared
-                  className={styles.button}
-                  onClick={() => this.setShowPasswordWizardModal(true)}
-                >
-                  Change
-                </ButtonSquared>
-              </>
-            ) : null}
-            {this.serverData?.hasPassword && !hasPassword ? (
-              <>
-                <LineBreak />
-                <ul>
-                  <li>
-                    <Text>
-                      {`You will no longer be able to sign in using password.`}
-                    </Text>
-                  </li>
-                </ul>
-              </>
-            ) : null}
-            {this.renderPasswordWizardModal()}
-          </FormSection>
-          <LineBreak />
-          <LineBreak />
-          <FormSection label={'2-Step Verification'}>
-            <ToggleField
-              label={isMfaEnabled ? 'Activated' : 'Deactivated'}
-              value={isMfaEnabled}
-              onChange={this.handleMfaToggle}
-            />
-            {isMfaEnabled &&
-            mfaMethod === 'Phone' &&
-            phoneCallingCode &&
-            phoneNumber ? (
-              <>
-                {this.serverData?.isMfaEnabled ? (
-                  <>
-                    <LineBreak />
-                    <ButtonSquared
-                      className={styles.button}
-                      onClick={() => this.setShowAddPhoneWizardModal(true)}
-                    >
-                      Change
-                    </ButtonSquared>
-                  </>
-                ) : null}
-                <LineBreak />
-                <PhoneField
-                  label={'Phone'}
-                  callingCode={phoneCallingCode}
-                  onCallingCodeChange={this.handlePhoneCallingCodeChange}
-                  phoneNumber={phoneNumber}
-                  onPhoneNumberChange={this.handlePhoneNumberChange}
-                  onValidityChange={this.handlePhoneValidityChange}
-                  disabled
-                />
-                <LineBreak />
-                <ul>
-                  <li>
-                    <Text>
-                      {`When using password to sign in, a 6-digit code will be sent to your ${mfaMethod.toLowerCase()}.`}
-                    </Text>
-                  </li>
-                </ul>
-              </>
-            ) : null}
-            {this.serverData?.isMfaEnabled && !isMfaEnabled ? (
-              <>
-                <LineBreak />
-                <ul>
-                  <li>
-                    <Text>
-                      {`When using password to sign in, a 6-digit code will no longer be required.`}
-                    </Text>
-                  </li>
-                </ul>
-              </>
-            ) : null}
-            {this.renderAddPhoneWizardModal()}
-          </FormSection>
+          <TextField
+            className={'text-field name-field'}
+            label={'API Base URL'}
+            value={apiBase}
+            onInput={this.handleApiBaseChange}
+            onEnterPress={this.submitChanges}
+            autoFocus
+          />
+          <TextField
+            className={'text-field name-field'}
+            label={'API Key (Optional)'}
+            value={apiKey}
+            onInput={this.handleApiKeyChange}
+            onEnterPress={this.submitChanges}
+            autoFocus
+          />
           <LineBreak />
           <LineBreak />
           <ButtonSquared
@@ -727,6 +807,16 @@ class Settings extends Component<any, State> {
         {/*</FormSection>*/}
         <SpinnerModal open={inFlight} />
         {this.renderLoginModal()}
+        {/*<Button className={'button close-settings-button'} onClick={() => {*/}
+        {/*  history?.push('/app/settings')*/}
+        {/*}}>*/}
+        {/*  <PiXBold />*/}
+        {/*</Button>*/}
+        <CloseButton
+          onClick={() => {
+            history?.push('/app')
+          }}
+        />
       </Body>
     )
   }

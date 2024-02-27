@@ -75,7 +75,7 @@ type Agent {
   versionId: Int @sql(type: "INT", default: "0", index: true)
   agencyId: Int @sql(type: "INT", index: true)
   name: String @sql(type: "VARCHAR(170)", unicode: true)
-  model: String @sql(type: "VARCHAR(170)")
+  model: String @sql(type: "VARCHAR(170)", nullable: true)
   orderIndex: Int @sql(type: "INT")
   isManager: Boolean @sql(type: "BOOLEAN", default: "FALSE")
   isDeleted: Boolean @sql(type: "BOOLEAN", default: "FALSE")

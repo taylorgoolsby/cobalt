@@ -61,7 +61,7 @@ export default class AgentInterface {
 
   static async insert(
     agencyId: number,
-    model: string,
+    model: ?string,
     name: string,
     orderIndex: number,
   ): Promise<number> {

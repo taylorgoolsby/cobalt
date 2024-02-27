@@ -42,6 +42,7 @@ import classnames from 'classnames'
 import mainStore from '../stores/MainStore.js'
 import reportEvent from '../utils/reportEvent.js'
 import { toJS } from 'mobx'
+import useHistory from '../utils/useHistory.js'
 
 const agentPanelDefaultWidth = 300
 
@@ -136,6 +137,42 @@ const styles = {
           background-color: rgba(255, 255, 255, 0.22);
             /!*background-color: ${Colors.blackSoftest};*!/
         }*/
+      }
+    }
+
+    .settings-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      min-width: 120px;
+      max-width: 282px;
+      height: 34px;
+      min-height: 34px;
+      padding: 0 16px;
+      border-radius: 4px;
+      background-color: transparent;
+
+      > span {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        min-width: 0;
+        /*font-family: 'Sometype Mono', monospace;*/
+        /*opacity: 0.3;*/
+        font-size: 16px;
+      }
+
+      &:hover:not([disabled='']):not([disabled='true']):not(
+          [data-small='true']
+        ) {
+        background-color: rgba(255, 255, 255, 0.22);
+        /*background-color: ${Colors.blackSoftest};*/
       }
     }
   `,
@@ -528,6 +565,8 @@ const Chat = observer((props: ChatProps): any => {
   const agencyVersionId =
     selectedConversation?.agencyId ?? agency?.agencyId ?? 0
 
+  const [history] = useHistory()
+
   return (
     <View className={styles.chat}>
       <View ref={scrollRef} className={'messages'}>
@@ -558,20 +597,28 @@ const Chat = observer((props: ChatProps): any => {
         onInput={handleInput}
         onSubmit={handleSubmit}
       />
-      <ConversationsListPane
-        ref={chatListRef}
-        currentUser={currentUser}
-        agency={agency}
-        selectedConversation={selectedConversation}
-        onSelectConversation={handleConversationSelected}
-        agencyConversations={agencyConversations}
-        isLoading={isLoading}
-      />
-      <View className="agency-version-wrap">
-        <View className="button">
-          <Text>{`ID: ${agencyVersionId}`}</Text>
-        </View>
-      </View>
+      {/*<ConversationsListPane*/}
+      {/*  ref={chatListRef}*/}
+      {/*  currentUser={currentUser}*/}
+      {/*  agency={agency}*/}
+      {/*  selectedConversation={selectedConversation}*/}
+      {/*  onSelectConversation={handleConversationSelected}*/}
+      {/*  agencyConversations={agencyConversations}*/}
+      {/*  isLoading={isLoading}*/}
+      {/*/>*/}
+      {/*<View className="agency-version-wrap">*/}
+      {/*  <Button className="button">*/}
+      {/*    <Text>{`ID: ${agencyVersionId}`}</Text>*/}
+      {/*  </Button>*/}
+      {/*</View>*/}
+      <Button
+        className={'button settings-button'}
+        onClick={() => {
+          history?.push('/app/settings')
+        }}
+      >
+        <Text>{'Settings'}</Text>
+      </Button>
     </View>
   )
 })
@@ -1013,11 +1060,11 @@ const AgencyInteract: (AgencyInteractProps) => any = observer(
           agencyConversations={agencyConversations}
           isLoading={isLoading}
         />
-        <AgentsPane
-          currentUser={currentUser}
-          agency={agency}
-          selectedConversation={selectedConversation}
-        />
+        {/*<AgentsPane*/}
+        {/*  currentUser={currentUser}*/}
+        {/*  agency={agency}*/}
+        {/*  selectedConversation={selectedConversation}*/}
+        {/*/>*/}
       </View>
     )
   },

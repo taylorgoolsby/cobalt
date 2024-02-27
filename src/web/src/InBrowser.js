@@ -118,6 +118,11 @@ const Body: any = observer((): any => {
     )
   }
   const currentUser = res.data?.viewer?.currentUser
+
+  if (!currentUser) {
+    return <Landing />
+  }
+
   const isOnboarded = !!currentUser?.isOnboarded
   if (!!currentUser && !isOnboarded) {
     return <Onboarding />

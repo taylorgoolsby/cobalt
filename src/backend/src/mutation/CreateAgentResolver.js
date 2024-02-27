@@ -96,10 +96,10 @@ export async function resolver(
     }
   }
 
-  const availableModels = await ChatGPTRest.getAvailableModels(user.openAiKey)
-  if (!availableModels.includes(model)) {
-    throw new Error('Invalid model.')
-  }
+  // const availableModels = await ChatGPTRest.getAvailableModels(user.openAiKey)
+  // if (!availableModels.includes(model)) {
+  //   throw new Error('Invalid model.')
+  // }
 
   // only create a new version if there are chats on the existing version.
   let latestAgencyId = agencyId
