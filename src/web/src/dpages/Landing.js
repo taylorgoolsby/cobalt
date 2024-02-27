@@ -17,6 +17,9 @@ import Logo from '../components/Logo.js'
 import Link from '../components/Link.js'
 import useHistory from '../utils/useHistory.js'
 import reportEvent from '../utils/reportEvent.js'
+import OfflineCreateOrStartUser from '../graphql/mutation/OfflineCreateOrStartUser.js'
+import { showErrorModal } from '../modals/ErrorModal.js'
+import sessionStore from '../stores/SessionStore.js'
 
 const styles = {
   page: css`
@@ -77,16 +80,15 @@ const styles = {
 const motd = `
 Welcome!
 
-**${Config.siteName}** is a UI for multiagent AI.
+**${Config.siteName}** is a privacy-first digital assistant.
 
-Here you can:
+It can help you with a wide range of tasks, such as:
 
-* Define a multiagent environment.
-* Within that environment, define agents.
-* For each agent, define custom instructions.
-* Define how agents interact with each other.
-* Debug your environment and agents.
-* Deploy your environment to the cloud and access it through an API.
+* Knowledge base management.
+* Brainstorming.
+* Task management and scheduling.
+* Internet search.
+* Social media management.
 
 `.trim()
 
@@ -123,12 +125,22 @@ const Landing: any = observer(() => {
       <View className={'side-panel'}>
         <Text h1>{'Get Started'}</Text>
         <ButtonSquared
-          onClick={() => {
+          onClick={async () => {
             reportEvent('get started click', {})
-            history?.push('/auth')
+
+            const res = await OfflineCreateOrStartUser({})
+            if (res?.success) {
+              const sessionTokenObtained =
+                await sessionStore.exchangeSessionToken({
+                  passwordToken: res.passwordToken,
+                })
+              if (sessionTokenObtained) {
+                history?.push('/app')
+              }
+            }
           }}
         >
-          {'Sign In'}
+          {'Start'}
         </ButtonSquared>
         <Footer />
       </View>

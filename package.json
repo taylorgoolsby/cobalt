@@ -1,5 +1,5 @@
 {
-  "name": "agencyai-gg",
+  "name": "chatbro",
   "private": true,
   "version": "1.0.0",
   "main": "index.js",
@@ -14,8 +14,8 @@
     "mysql": "rebuild --watch src --output build --transform 'src/*/{!(node_modules),node_modules/common}/**/*.{js,mjs}' --using scripts/transformer.js --fork build/mysql/src/localStart.js -k 3306",
     "clean-sql": "node src/mysql/src/localClean.js",
     "build": "npm run build-web && rebuild -w src --output build --transform 'src/*/{!(node_modules),node_modules/common}/**/*.{js,mjs}' --using scripts/transformer.js && rm -rf artifact && mkdir artifact && cp -r build/backend artifact/backend && rm -rf build/common/secrets && cp -r build/common artifact/common && cp -r build/web/dist artifact/backend/src/dist && cp prod.package.json artifact/package.json && cp -r .platform artifact/.platform && node scripts/link-common.js && npm run install-artifact && node scripts/zip.js",
-    "create-eb": "eb create agencyai-gg-prod-backend --sample --profile multiagent --instance-type t4g.micro --min-instance=1 --max-instances=1 --envvars $(node scripts/printEnvString.js)",
-    "deploy-eb": "npm run build && eb deploy agencyai-gg-prod-backend --profile multiagent",
+    "create-eb": "eb create chatbro-prod-backend --sample --profile multiagent --instance-type t4g.micro --min-instance=1 --max-instances=1 --envvars $(node scripts/printEnvString.js)",
+    "deploy-eb": "npm run build && eb deploy chatbro-prod-backend --profile multiagent",
     "deploy-cdk": "cdk bootstrap --profile multiagent && cdk deploy --profile multiagent",
     "build-web": "cd src/web && yarn build",
     "build-web-local": "cd src/web && yarn build-local",

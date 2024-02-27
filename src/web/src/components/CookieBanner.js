@@ -101,8 +101,8 @@ const CookieBanner: any = observer((): any => {
     <View className={styles.container}>
       <Text className="title">{'Your Privacy'}</Text>
       <Text className="description">
-        By clicking "Allow all cookies", you agree agencyai.gg can store cookies
-        on your device and disclose information in accordance with our{' '}
+        By clicking "Allow all cookies", you agree chatbro.online can store
+        cookies on your device and disclose information in accordance with our{' '}
         <Link href={'/cookie'}>Cookie Policy</Link>.
       </Text>
       <View style={{ flex: 1 }} />

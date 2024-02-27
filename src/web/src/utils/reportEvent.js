@@ -1,7 +1,7 @@
 // @flow
 
 import sessionStore from '../stores/SessionStore.js'
-import posthog from 'posthog-js'
+// import posthog from 'posthog-js'
 
 export default function reportEvent(
   eventName: string,
@@ -9,9 +9,9 @@ export default function reportEvent(
 ): void {
   if (sessionStore.appLoaded) {
     if (!!sessionStore.cookieSettings?.performance) {
-      posthog.capture(eventName, {
-        properties,
-      })
+      // posthog.capture(eventName, {
+      //   properties,
+      // })
     }
   }
 }

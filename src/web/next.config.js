@@ -12,12 +12,7 @@ const nextConfig = {
   // },
   env: {
     RUNTIME: process.env.NODE_ENV,
-    BACKEND_HOST: isProd ? 'https://api.agencyai.gg' : 'http://localhost:4000',
-    BUGSNAG_KEY: '135961c700e05de1db1294359a2f4af6',
-    POSTHOG_KEY: isProd
-      ? 'phc_BPdQYArzL17mpAOadEF46PkWMARUqCNeti2pr2kJEwL'
-      : '',
-    GTAG_ID: isProd ? 'G-ELMBCC8G0S' : '',
+    BACKEND_HOST: 'http://localhost:4000',
   },
   async rewrites() {
     return [

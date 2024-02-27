@@ -87,7 +87,7 @@ const backendHost = isLocal
   ? `http://localhost:${port}`
   : nonMaybe(WEB_BACKEND_HOST)
 
-const dbDatabase = isLocal ? 'local_multiagent' : nonMaybe(DB_DATABASE)
+const dbDatabase = isLocal ? 'local_chatbro' : nonMaybe(DB_DATABASE)
 console.log('dbDatabase', dbDatabase)
 
 const oauthGithubClientId = OAUTH_GITHUB_CLIENT_ID
@@ -114,7 +114,7 @@ delete cdkEnvironment['AWS_PROFILE']
 const awsResourceBaseName: string = nonMaybe(AWS_RESOURCE_BASE_NAME)
 
 class Config {
-  static appName: string = 'agencyai.gg'
+  static appName: string = 'chatbro'
   static cdkEnvironment: { [string]: any } = cdkEnvironment
   static version: string = nonMaybe(version)
   static stage: string = stage
@@ -151,12 +151,10 @@ class Config {
   static twilioFromNumber: string = nonMaybe(TWILIO_FROM_NUMBER)
 
   static port: number = port
-  static webHost: string = isLocal
-    ? useLocalCan
-      ? 'https://agencyai.local'
-      : 'http://localhost:3000'
-    : nonMaybe(WEB_CLIENT_HOST)
-  static backendHost: string = backendHost
+  // static webHost: string = 'http://localhost:63465'
+  // static backendHost: string = 'http://localhost:63453'
+  static webHost: string = 'http://localhost:3000'
+  static backendHost: string = 'http://localhost:4000'
 
   static authTokenSecret: string = nonMaybe(AUTH_TOKEN_SECRET)
   static sessionTokenSecret: string = nonMaybe(SESSION_TOKEN_SECRET)

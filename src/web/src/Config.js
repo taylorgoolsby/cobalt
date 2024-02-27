@@ -14,5 +14,5 @@ export default class Config {
   static devAssetsBucket: string =
     'https://s3.us-east-2.amazonaws.com/todo-dev-assets'
 
-  static siteName: string = 'agencyai.gg'
+  static siteName: string = 'chatbro'
 }

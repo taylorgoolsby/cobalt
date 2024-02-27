@@ -1,27 +1,27 @@
 // @flow
 
-import Bugsnag from '@bugsnag/js'
-import BugsnagPluginReact from '@bugsnag/plugin-react'
+// import Bugsnag from '@bugsnag/js'
+// import BugsnagPluginReact from '@bugsnag/plugin-react'
 
 // Bugsnag does not use cookies.
-Bugsnag.start({
-  apiKey: process.env.BUGSNAG_KEY,
-  plugins: [new BugsnagPluginReact()],
-  appVersion: '1',
-  // $FlowFixMe
-  releaseStage: process.env.RUNTIME,
-  enabledReleaseStages: ['production', 'staging'],
-  redactedKeys: [/token/, /Token/],
-})
+// Bugsnag.start({
+//   apiKey: process.env.BUGSNAG_KEY,
+//   plugins: [new BugsnagPluginReact()],
+//   appVersion: '1',
+//   // $FlowFixMe
+//   releaseStage: process.env.RUNTIME,
+//   enabledReleaseStages: ['production', 'staging'],
+//   redactedKeys: [/token/, /Token/],
+// })
 
-import posthog from 'posthog-js'
-
-if (process.env.RUNTIME === 'production') {
-  posthog.init(process.env.POSTHOG_KEY, {
-    api_host: 'https://app.posthog.com',
-    autocapture: false,
-  })
-}
+// import posthog from 'posthog-js'
+//
+// if (process.env.RUNTIME === 'production') {
+//   posthog.init(process.env.POSTHOG_KEY, {
+//     api_host: 'https://app.posthog.com',
+//     autocapture: false,
+//   })
+// }
 
 import React from 'react'
 import { makeHistory } from './utils/history.js'
@@ -39,20 +39,20 @@ import Onboarding from './dpages/Onboarding.js'
 import Home from './dpages/Home.js'
 import { observer } from 'mobx-react-lite'
 import { css } from 'goober'
-import Terms from './dpages/Terms.js'
-import Docs from './dpages/Docs.js'
-import Privacy from './dpages/Privacy.js'
+// import Terms from './dpages/Terms.js'
+// import Docs from './dpages/Docs.js'
+// import Privacy from './dpages/Privacy.js'
 import Colors from './Colors.js'
-import CookieBanner from './components/CookieBanner.js'
-import Cookie from './dpages/Cookie.js'
-import Script from 'next/script'
+// import CookieBanner from './components/CookieBanner.js'
+// import Cookie from './dpages/Cookie.js'
+// import Script from 'next/script'
 
 configure({
   enforceActions: 'never',
 })
 
 const history = makeHistory()
-const ErrorBoundary = Bugsnag.getPlugin('react').createErrorBoundary(React)
+// const ErrorBoundary = Bugsnag.getPlugin('react').createErrorBoundary(React)
 
 const styles = {
   app: css`
@@ -128,13 +128,13 @@ const Body: any = observer((): any => {
 
 export const routes: { [string]: any } = {
   '/': Body,
-  '/auth': Landing,
-  '/create': Landing,
-  '/terms': Terms,
-  '/privacy': Privacy,
-  '/cookie': Cookie,
-  '/docs': Docs,
-  '/app': Body,
+  // '/auth': Landing,
+  // '/create': Landing,
+  // '/terms': Terms,
+  // '/privacy': Privacy,
+  // '/cookie': Cookie,
+  // '/docs': Docs,
+  // '/app': Body,
 }
 
 // InBrowser is responsible for rendering the SPA portion of the app.
@@ -143,54 +143,54 @@ export const routes: { [string]: any } = {
 const InBrowser: any = observer((): any => {
   return (
     <>
-      <ErrorBoundary>
-        <ApolloProvider client={apolloClient}>
-          <Router history={history}>
-            <View id="app" className={styles.app}>
-              <Switch>
-                {Object.keys(routes).map((path, i) => {
-                  return (
-                    <Route
-                      key={i}
-                      exact
-                      path={path}
-                      render={(props) => {
-                        const Component = routes[path]
-                        return <Component {...props} />
-                      }}
-                    />
-                  )
-                })}
-                <Route
-                  path={'/*'}
-                  render={(props) => {
-                    return <Body {...props} />
-                  }}
-                />
-              </Switch>
-              {sessionStore.appLoaded ? <CookieBanner /> : null}
-            </View>
-            <ModalLayer />
-          </Router>
-        </ApolloProvider>
-      </ErrorBoundary>
-      {/* Google tag (gtag.js) */}
-      {!!sessionStore.cookieSettings?.performance && process.env.GTAG_ID ? (
-        <>
-          <Script
-            strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GTAG_ID}`}
-          />
-          <Script strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${process.env.GTAG_ID}');
-            `}
-          </Script>
-        </>
-      ) : null}
+      {/*<ErrorBoundary>*/}
+      <ApolloProvider client={apolloClient}>
+        <Router history={history}>
+          <View id="app" className={styles.app}>
+            <Switch>
+              {Object.keys(routes).map((path, i) => {
+                return (
+                  <Route
+                    key={i}
+                    exact
+                    path={path}
+                    render={(props) => {
+                      const Component = routes[path]
+                      return <Component {...props} />
+                    }}
+                  />
+                )
+              })}
+              <Route
+                path={'/*'}
+                render={(props) => {
+                  return <Body {...props} />
+                }}
+              />
+            </Switch>
+            {/*{sessionStore.appLoaded ? <CookieBanner /> : null}*/}
+          </View>
+          <ModalLayer />
+        </Router>
+      </ApolloProvider>
+      {/*</ErrorBoundary>*/}
+      {/*/!* Google tag (gtag.js) *!/*/}
+      {/*{!!sessionStore.cookieSettings?.performance && process.env.GTAG_ID ? (*/}
+      {/*  <>*/}
+      {/*    <Script*/}
+      {/*      strategy="afterInteractive"*/}
+      {/*      src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GTAG_ID}`}*/}
+      {/*    />*/}
+      {/*    <Script strategy="afterInteractive">*/}
+      {/*      {`*/}
+      {/*        window.dataLayer = window.dataLayer || [];*/}
+      {/*        function gtag(){dataLayer.push(arguments);}*/}
+      {/*        gtag('js', new Date());*/}
+      {/*        gtag('config', '${process.env.GTAG_ID}');*/}
+      {/*      `}*/}
+      {/*    </Script>*/}
+      {/*  </>*/}
+      {/*) : null}*/}
     </>
   )
 })

@@ -29,7 +29,7 @@ async function send(to: Array<string>, subject: string, html: string) {
   const headers = {
     'X-Postmark-Server-Token': Config.postmarkKey,
   }
-  const from = `agencyai.gg <${Config.emailFromAddress}>`
+  const from = `chatbro.online <${Config.emailFromAddress}>`
 
   let envTag = ''
   if (!Config.isProd) {

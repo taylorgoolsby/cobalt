@@ -40,7 +40,7 @@ async function send(to: Array<string>, subject: string, html: string) {
       Buffer.from(`api:${Config.mailgunKey}`, 'utf-8').toString('base64'),
   }
   const url = `https://api.mailgun.net/v3/${Config.mailgunDomain}/messages`
-  const from = `agencyai.gg <${Config.emailFromAddress}>`
+  const from = `chatbro.online <${Config.emailFromAddress}>`
 
   let envTag = ''
   if (!Config.isProd) {

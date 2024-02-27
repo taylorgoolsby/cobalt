@@ -26,6 +26,7 @@ type Mutation {
   getDemoExample(input: GetDemoExampleInput!): GetDemoExampleResponse!
   getDemoSessionToken(input: GetDemoSessionTokenInput!): GetDemoSessionTokenResponse!
   mergeAccounts(input: MergeAccountsInput!): MergeAccountsResponse!
+  offlineCreateOrStartUser(input: OfflineCreateOrStartUserInput!): OfflineCreateOrStartUserResponse!
   sendMfaCode(input: SendMfaCodeInput!): SendMfaCodeResponse!
   testOpenAiKey(input: TestOpenAiKeyInput!): TestOpenAiKeyResponse!
   updateAgency(input: UpdateAgencyInput!): UpdateAgencyResponse!
@@ -345,6 +346,15 @@ type MergeAccountsResponse {
   success: Boolean!
   finalSessionToken: String
   errorAlreadyMerged: Boolean
+}
+
+input OfflineCreateOrStartUserInput {
+  dummy: String
+}
+
+type OfflineCreateOrStartUserResponse {
+  success: Boolean!
+  passwordToken: String!
 }
 
 input SendMfaCodeInput {

@@ -11,6 +11,7 @@ import * as DeleteAuthToken from './DeleteAuthTokenResolver.js'
 import * as GetDemoExample from './GetDemoExampleResolver.js'
 import * as GetDemoSessionToken from './GetDemoSessionTokenResolver.js'
 import * as MergeAccounts from './MergeAccountsResolver.js'
+import * as OfflineCreateOrStartUser from './OfflineCreateOrStartUserResolver.js'
 import * as SendMfaCode from './SendMfaCodeResolver.js'
 import * as TestOpenAiKey from './TestOpenAiKeyResolver.js'
 import * as UpdateAgency from './UpdateAgencyResolver.js'
@@ -30,6 +31,7 @@ export const typeDefs: any = gql`
   ${GetDemoExample.typeDefs}
   ${GetDemoSessionToken.typeDefs}
   ${MergeAccounts.typeDefs}
+  ${OfflineCreateOrStartUser.typeDefs}
   ${SendMfaCode.typeDefs}
   ${TestOpenAiKey.typeDefs}
   ${UpdateAgency.typeDefs}
@@ -51,6 +53,9 @@ export const typeDefs: any = gql`
       input: GetDemoSessionTokenInput!
     ): GetDemoSessionTokenResponse!
     mergeAccounts(input: MergeAccountsInput!): MergeAccountsResponse!
+    offlineCreateOrStartUser(
+      input: OfflineCreateOrStartUserInput!
+    ): OfflineCreateOrStartUserResponse!
     sendMfaCode(input: SendMfaCodeInput!): SendMfaCodeResponse!
     testOpenAiKey(input: TestOpenAiKeyInput!): TestOpenAiKeyResponse!
     updateAgency(input: UpdateAgencyInput!): UpdateAgencyResponse!
@@ -73,6 +78,7 @@ export const resolvers: any = {
     getDemoExample: GetDemoExample.resolver,
     getDemoSessionToken: GetDemoSessionToken.resolver,
     mergeAccounts: MergeAccounts.resolver,
+    offlineCreateOrStartUser: OfflineCreateOrStartUser.resolver,
     sendMfaCode: SendMfaCode.resolver,
     testOpenAiKey: TestOpenAiKey.resolver,
     updateAgency: UpdateAgency.resolver,

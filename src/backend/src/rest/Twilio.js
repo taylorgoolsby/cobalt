@@ -3,10 +3,18 @@
 import twilio from 'twilio'
 import Config from 'common/src/Config.js'
 
-const client = twilio(Config.twilioSid, Config.twilioAuthToken)
+const client =
+  !!Config.twilioSid && !!Config.twilioAuthToken
+    ? twilio(Config.twilioSid, Config.twilioAuthToken)
+    : null
 
 export default class Twilio {
   static async sendSms(to: string, body: string): Promise<any> {
+    if (!client) {
+      console.error('twilio not configured')
+      return
+    }
+
     if (!to.startsWith('+')) {
       to = '+' + to
     }

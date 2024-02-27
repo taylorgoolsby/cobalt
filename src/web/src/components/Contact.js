@@ -13,7 +13,7 @@ const encrypted =
 // $FlowFixMe
 // import(/* webpackIgnore: true */ 'https://esm.sh/occulto@2.0.1').then(
 //   async ({ AES }: any): any => {
-//     const message = 'mailto:contact@agencyai.gg'
+//     const message = 'mailto:contact@chatbro.online'
 //     const encrypted = await AES.encryptEasy(message, un)
 //     console.log("encrypted", encrypted)
 //   }

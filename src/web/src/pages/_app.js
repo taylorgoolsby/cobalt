@@ -152,7 +152,7 @@ const App = ({ Component, pageProps }: any): any => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>agencyai.gg</title>
+        <title>chatbro</title>
       </Head>
       <GlobalStyles />
       {body}
