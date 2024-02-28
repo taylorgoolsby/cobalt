@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "main": "index.js",
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-only",
   "description": "A UI for multiagent AI.",
   "keywords": [],
   "files": [],
