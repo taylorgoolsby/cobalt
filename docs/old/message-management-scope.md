@@ -1,5 +1,7 @@
 # Message Management
 
+This is the initial scope for AgencyAI. This project reuses the codebase for AgencyAI, so this documentation may still be relevant.
+
 This is a UI for building and managing multiagent AI.
 
 There are multiple agents which will be talking to each other.

@@ -15,9 +15,21 @@ import { getCallbacks } from './callbacks.js'
 
 async function newMessageHandler(user: UserSQL, data: NewMessageInput) {
   console.debug('newMessage', data)
-  const openAiKey = user?.openAiKey
-  if (!openAiKey) {
+  // const openAiKey = user?.openAiKey
+  // if (!openAiKey) {
+  //   throw new Error('Unauthorized')
+  // }
+  const apiBase = user?.inferenceServerConfig?.apiBase
+  if (!apiBase) {
     throw new Error('Unauthorized')
+  }
+  const apiKey = user?.inferenceServerConfig?.apiKey
+  const isOpenAi =
+    user?.inferenceServerConfig?.apiBase === 'https://api.openai.com'
+  if (isOpenAi) {
+    if (!apiKey) {
+      throw new Error('Unauthorized')
+    }
   }
 
   if (!data.agencyId) {
@@ -122,8 +134,7 @@ async function newMessageHandler(user: UserSQL, data: NewMessageInput) {
 
   // Start the next chat iteration with the AgentMind, and stream token updates to client:
   AgentMind.chatIteration(
-    user.userId,
-    openAiKey,
+    user,
     data.agencyId,
     managerAgentConversation.agentId,
     data.chatId,

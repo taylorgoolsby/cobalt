@@ -10,7 +10,7 @@ import AgentConversationInterface from '../../schema/AgentConversation/AgentConv
 import AgencyConversationInterface from '../../schema/AgencyConversation/AgencyConversationInterface.js'
 import AgentInterface from '../../schema/Agent/AgentInterface.js'
 import MessageInterface from '../../schema/Message/MessageInterface.js'
-import ChatGPTRest from '../ChatGPTRest.js'
+import InferenceRest from '../InferenceRest.js'
 import InstructionInterface from '../../schema/Instruction/InstructionInterface.js'
 import { MessageRole, MessageType } from '../../schema/Message/MessageSchema.js'
 import type { UserSQL } from '../../schema/User/UserSchema.js'
@@ -290,29 +290,21 @@ export async function generateName(
   agencyConversationId: string,
   managerAgentId: number,
   user: UserSQL,
-  openAiKey: string,
   originalName: string,
   userPrompt: string,
 ): Promise<UpdateNameOutput> {
   console.debug('generating a name')
-  const nameRes = await ChatGPTRest.chatCompletion(
-    openAiKey,
-    user.gptModels[0] || 'gpt-3.5-turbo',
-    [
-      {
-        role: 'system',
-        content:
-          'You are a writer tasked with generating a title for some text. The title should be short. The following message is the text.',
-      },
-      {
-        role: 'user',
-        content: userPrompt,
-      },
-    ],
+  const nameRes = await InferenceRest.chatCompletion(user, [
     {
-      responseFormat: 'text',
+      role: 'system',
+      content:
+        'You are a writer tasked with generating a title for some text. The title should be short. The following message is the text.',
     },
-  )
+    {
+      role: 'user',
+      content: userPrompt,
+    },
+  ])
   if (nameRes?.choices?.[0]?.finish_reason === 'stop') {
     const updatedName =
       nameRes?.choices?.[0]?.message?.content?.replace(/^"(.*)"$/, '$1') || ''

@@ -3,6 +3,7 @@
 import axios from 'axios'
 import parseAxiosError from '../utils/parseAxiosError.js'
 import Config from 'common/src/Config.js'
+import type { UserSQL } from '../schema/User/UserSchema.js'
 
 export type GPTMessage = {
   role: string,
@@ -59,7 +60,7 @@ export const standardModels = [
   // 'gpt-4',
 ]
 
-export default class ChatGPTRest {
+export default class InferenceRest {
   static async getAvailableModels(authToken: ?string): Promise<Array<string>> {
     if (!authToken) return []
 
@@ -123,22 +124,25 @@ export default class ChatGPTRest {
   }
 
   static relayChatCompletionStream(
-    authToken: string,
-    model: string,
+    user: UserSQL,
     messages: Array<GPTMessage>,
     onData: (data: ChatCompletionsResponse) => any,
     onError?: () => any,
-    options?: ?{
-      responseFormat?: 'json_object' | 'text',
-    },
   ): void {
-    const responseFormat = canUseJSON(model)
-      ? {
-          type: options?.responseFormat ?? 'json_object',
-        }
-      : {
-          type: options?.responseFormat || 'text',
-        }
+    const apiBase = user.inferenceServerConfig?.apiBase
+    const apiKey = user.inferenceServerConfig?.apiKey
+
+    if (!apiBase) {
+      throw new Error('apiBase is required')
+    }
+
+    // const responseFormat = canUseJSON(model)
+    //   ? {
+    //       type: options?.responseFormat ?? 'json_object',
+    //     }
+    //   : {
+    //       type: options?.responseFormat || 'text',
+    //     }
 
     // console.debug('GPT', messages[messages.length - 1])
 
@@ -148,26 +152,33 @@ export default class ChatGPTRest {
 
     // console.debug('start openai relay')
 
+    let headers = {}
+    if (apiKey) {
+      headers = {
+        Authorization: `Bearer ${apiKey}`,
+      }
+    }
+
+    // todo: As long as completionOptions is configured by the end user,
+    //  it should be safe to pass them through without checking what they are.
+    const data: any = user.inferenceServerConfig?.completionOptions ?? {}
+    data.messages = messages
+    data.stream = true
+
     makeRequestWithRetry(
       () =>
         axios({
           method: 'POST',
-          url: 'https://api.openai.com/v1/chat/completions',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-          data: {
-            model,
-            messages,
-            response_format: responseFormat,
-            stream: true,
-          },
+          url: `${apiBase}/v1/chat/completions`,
+          headers,
+          data,
           responseType: 'stream',
           timeout: 10000,
         })
           .then((response) => {
             response.data.on('data', (chunk) => {
               const data = chunk.toString()
+
               dataLog.push(data)
 
               buffer += data
@@ -233,34 +244,37 @@ export default class ChatGPTRest {
   }
 
   static async chatCompletion(
-    authToken: string,
-    model: string,
+    user: UserSQL,
     messages: Array<GPTMessage>,
-    options?: ?{
-      responseFormat?: 'json_object' | 'text',
-    },
   ): Promise<ChatCompletionsResponse> {
-    const responseFormat = canUseJSON(model)
-      ? {
-          type: options?.responseFormat ?? 'json_object',
-        }
-      : {
-          type: options?.responseFormat || 'text',
-        }
+    const apiBase = user.inferenceServerConfig?.apiBase
+    const apiKey = user.inferenceServerConfig?.apiKey
+
+    if (!apiBase) {
+      throw new Error('apiBase is required')
+    }
+
+    // const responseFormat = canUseJSON(model)
+    //   ? {
+    //       type: options?.responseFormat ?? 'json_object',
+    //     }
+    //   : {
+    //       type: options?.responseFormat || 'text',
+    //     }
 
     // console.debug('GPT', messages[messages.length - 1])
 
+    // todo: As long as completionOptions is configured by the end user,
+    //  it should be safe to pass them through without checking what they are.
+    const data: any = user.inferenceServerConfig?.completionOptions ?? {}
+    data.messages = messages
+    data.stream = false
+
     const res = await send(
       'POST',
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model,
-        messages,
-        response_format: responseFormat,
-        // frequency_penalty: -0.1,
-        // presence_penalty: -0.1
-      },
-      authToken,
+      `${apiBase}/v1/chat/completions`,
+      data,
+      apiKey,
     )
 
     if (res.error) {
@@ -290,7 +304,7 @@ async function send(
   method: 'GET' | 'POST',
   url: string,
   data: ?{ [string]: any },
-  authToken: string,
+  authToken: ?string,
 ): any {
   const config: { url: string, headers?: { ... }, ... } = {
     method: method.toLowerCase(),

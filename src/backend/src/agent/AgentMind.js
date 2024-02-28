@@ -35,9 +35,9 @@ import type {
   MessageSQL,
 } from '../schema/Message/MessageSchema.js'
 import MessageInterface from '../schema/Message/MessageInterface.js'
-import type { GPTMessage } from '../rest/ChatGPTRest.js'
-import ChatGPTRest from '../rest/ChatGPTRest.js'
-import type { ChatCompletionsResponse } from '../rest/ChatGPTRest.js'
+import type { GPTMessage } from '../rest/InferenceRest.js'
+import InferenceRest from '../rest/InferenceRest.js'
+import type { ChatCompletionsResponse } from '../rest/InferenceRest.js'
 import { MessageRole, MessageType } from '../schema/Message/MessageSchema.js'
 import type {
   AppendMessageOutput,
@@ -47,12 +47,12 @@ import AgentInterface from '../schema/Agent/AgentInterface.js'
 import AgentConversationInterface from '../schema/AgentConversation/AgentConversationInterface.js'
 import { getCallbacks } from '../websocket/callbacks.js'
 import { dequeue, enqueue } from './mindQueue.js'
+import type { UserSQL } from '../schema/User/UserSchema.js'
 
 export default class AgentMind {
   static chatIteration(
     // These inputs should be verified for ownership already:
-    userId: string,
-    openAiKey: string,
+    user: UserSQL,
     agencyId: number,
     currentAgentVersionId: number,
     agencyConversationId: string,
@@ -62,14 +62,10 @@ export default class AgentMind {
     onMessageFromAgent: (output: AppendMessageOutput) => any,
     onUpdateMessage: (output: UpdateMessageOutput) => any,
   ): void {
+    const userId = user.userId
+
     Promise.resolve().then(async () => {
       try {
-        // console.debug('chatIteration')
-
-        // todo: whenever an agent receives a new message,
-        //  if it is already in the middle of a chatIteration,
-        //  then the incoming message is queued.
-
         const agents = await AgentInterface.getAll(agencyId)
         const agentMap: { [agentVersionId: number]: AgentSQL } = {}
         let managerAgent
@@ -89,186 +85,135 @@ export default class AgentMind {
           throw new Error('Agent not found.')
         }
 
+        // See readme.md for an overview of the chat iteration process.
+
         // Get all messages for this conversation:
         const startingMessages = await MessageInterface.getAll(
           agentConversationId,
         )
 
-        /*
-          The following section contains extra messages we append to the end of every user message.
-          This can be usful for nullifying any instruction by the end user to change behavior,
-          and also to reinforce desired behavior.
-        * */
-        // This extra message was needed to get gpt-3.5-turbo to start responding in JSON:
-        // originalGptMessages.push({
-        //   role: 'user',
-        //   content: 'Respond in JSON format.',
-        // })
-
-        const toList = await generateToListWithRetry(
-          openAiKey,
-          currentAgent.model,
-          startingMessages,
-          agentConversationId,
-          currentAgent,
-          managerAgent,
-          agentMap,
-          3,
-        )
-
-        const toListMessage = await MessageInterface.insert(
-          currentAgent.agentId,
-          agentConversationId,
-          MessageRole.SYSTEM,
-          {
-            fromAgentId: currentAgent.versionId,
-            text: JSON.stringify(toList),
-          },
-        )
-
-        const messagesWithToList = [...startingMessages, toListMessage]
+        const context: Array<GPTMessage> = []
 
         let newIterationWillBeStarted = false
-        // Create a blank Message row for each agent in the toList.
-        for (const nextAgentVersionId of toList.to) {
-          if (nextAgentVersionId === currentAgent.versionId) {
-            // Agent's aren't supposed to send messages to themselves.
-            console.error('Agent is sending a message to itself.')
-            // todo: send this error to the agent as a system message. Maybe the agent will learn not to repeat this mistake.
-            continue
-          }
-          if (nextAgentVersionId !== null && !agentMap[nextAgentVersionId]) {
-            console.error('Agent is sending an agent that does not exist.')
-            continue
-          }
 
-          // $FlowFixMe
-          console.log(
-            `Building response: ${currentAgent.versionId} -> ${
-              nextAgentVersionId ?? 'end user'
-            }`,
-          )
+        const envokeMind: ?EnvokeMind = await generateResponse(
+          user,
+          agencyId,
+          currentAgent,
+          managerAgent,
+          agencyConversationId,
+          agentConversationId,
+          context,
+          (output: AppendMessageOutput) => onMessageFromAgent(output),
+          (output: UpdateMessageOutput) => {
+            onUpdateMessage(output)
+          },
+        ).then(async (response: MessageSQL): Promise<?EnvokeMind> => {
+          // The following is stuff to do after the response has been generated.
+          // It was from AgencyAI, where agents can talk to other agents.
+          // This is not needed for this project.
+          // const nextPrompt = JSON.parse(response.data.text).text
+          // if (nextAgentVersionId === null) {
+          //   console.log('Response to end user.')
+          // }
+          // When an iteration is complete, we need to start a new iteration for each agent in the toList.
+          // if (nextAgentVersionId !== null) {
+          //   const nextAgent = agentMap[nextAgentVersionId]
+          //   if (!nextAgent) {
+          //     console.error(
+          //       `Unable to find agent given (agencyId, nextAgentVersionId): (${agencyId}, ${nextAgentVersionId})`,
+          //     )
+          //     return
+          //   }
+          //
+          //   const nextAgentConversation =
+          //     await AgentConversationInterface.get(
+          //       agencyConversationId,
+          //       nextAgent.agentId,
+          //     )
+          //   if (!nextAgentConversation) {
+          //     console.error(
+          //       `Unable to find agentConversation for agent ${nextAgent.versionId}`,
+          //     )
+          //     return
+          //   }
+          //
+          //   // Send nextPrompt to next agent as a GetToList message.
+          //   const userMessageData: MessageData = {
+          //     fromAgentId: currentAgent.versionId,
+          //     toAgentId: nextAgentVersionId,
+          //     text: JSON.stringify({
+          //       type: MessageType.GetToList,
+          //       messages: [
+          //         {
+          //           from: currentAgent.versionId,
+          //           text: nextPrompt,
+          //         },
+          //       ],
+          //     }),
+          //   }
+          //   const userMessage: MessageSQL = await MessageInterface.insert(
+          //     nextAgent.agentId,
+          //     nextAgentConversation.agentConversationId,
+          //     // When an agent sends a message to another agent, it is a user message.
+          //     // Responses from agents are assistant messages.
+          //     MessageRole.USER,
+          //     userMessageData,
+          //   )
+          //
+          //   await MessageInterface.linkMessages(
+          //     response.messageId,
+          //     userMessage.messageId,
+          //   )
+          //   userMessage.linkedMessageId = response.messageId
+          //   response.linkedMessageId = userMessage.messageId
+          //
+          //   // Update the client for the newly linkedMessageId:
+          //   onUpdateMessage({
+          //     agencyId,
+          //     chatId: agencyConversationId,
+          //     managerAgentId: managerAgent.agentId,
+          //     agentId: currentAgent.agentId,
+          //     message: response,
+          //   })
+          //
+          //   // Send this message to the client so that it can be displayed.
+          //   const output: AppendMessageOutput = {
+          //     agencyId: agencyId,
+          //     chatId: agencyConversationId,
+          //     managerAgentId: managerAgent.agentId,
+          //     message: userMessage,
+          //   }
+          //   onMessageFromAgent(output)
+          //
+          //   console.log(
+          //     `Queued message: ${currentAgent.versionId} -> ${nextAgentVersionId}`,
+          //   )
+          //   return () =>
+          //     AgentMind.chatIteration(
+          //       user,
+          //       agencyId,
+          //       nextAgentVersionId,
+          //       agencyConversationId,
+          //       nextAgentConversation.agentConversationId,
+          //       nextPrompt,
+          //       onMessageFromAgent,
+          //       onUpdateMessage,
+          //     )
+          // }
+        })
 
-          // For each blank message, each going to a different party,
-          // stream a completion for the content of the response.
-
-          const envokeMind: ?EnvokeMind = await generateResponse(
-            openAiKey,
-            agencyId,
-            currentAgent,
-            managerAgent,
-            agencyConversationId,
-            agentConversationId,
-            messagesWithToList,
-            nextAgentVersionId,
-            (output: AppendMessageOutput) => onMessageFromAgent(output),
-            (output: UpdateMessageOutput) => {
-              onUpdateMessage(output)
-            },
-          ).then(async (response: MessageSQL): Promise<?EnvokeMind> => {
-            const nextPrompt = JSON.parse(response.data.text).text
-
-            if (nextAgentVersionId === null) {
-              console.log('Response to end user.')
-            }
-
-            // When an iteration is complete, we need to start a new iteration for each agent in the toList.
-            if (nextAgentVersionId !== null) {
-              const nextAgent = agentMap[nextAgentVersionId]
-              if (!nextAgent) {
-                console.error(
-                  `Unable to find agent given (agencyId, nextAgentVersionId): (${agencyId}, ${nextAgentVersionId})`,
-                )
-                return
-              }
-
-              const nextAgentConversation =
-                await AgentConversationInterface.get(
-                  agencyConversationId,
-                  nextAgent.agentId,
-                )
-              if (!nextAgentConversation) {
-                console.error(
-                  `Unable to find agentConversation for agent ${nextAgent.versionId}`,
-                )
-                return
-              }
-
-              // Send nextPrompt to next agent as a GetToList message.
-              const userMessageData: MessageData = {
-                fromAgentId: currentAgent.versionId,
-                toAgentId: nextAgentVersionId,
-                text: JSON.stringify({
-                  type: MessageType.GetToList,
-                  messages: [
-                    {
-                      from: currentAgent.versionId,
-                      text: nextPrompt,
-                    },
-                  ],
-                }),
-              }
-              const userMessage: MessageSQL = await MessageInterface.insert(
-                nextAgent.agentId,
-                nextAgentConversation.agentConversationId,
-                // When an agent sends a message to another agent, it is a user message.
-                // Responses from agents are assistant messages.
-                MessageRole.USER,
-                userMessageData,
-              )
-
-              await MessageInterface.linkMessages(
-                response.messageId,
-                userMessage.messageId,
-              )
-              userMessage.linkedMessageId = response.messageId
-              response.linkedMessageId = userMessage.messageId
-
-              // Update the client for the newly linkedMessageId:
-              onUpdateMessage({
-                agencyId,
-                chatId: agencyConversationId,
-                managerAgentId: managerAgent.agentId,
-                agentId: currentAgent.agentId,
-                message: response,
-              })
-
-              // Send this message to the client so that it can be displayed.
-              const output: AppendMessageOutput = {
-                agencyId: agencyId,
-                chatId: agencyConversationId,
-                managerAgentId: managerAgent.agentId,
-                message: userMessage,
-              }
-              onMessageFromAgent(output)
-
-              console.log(
-                `Queued message: ${currentAgent.versionId} -> ${nextAgentVersionId}`,
-              )
-              return () =>
-                AgentMind.chatIteration(
-                  userId,
-                  openAiKey,
-                  agencyId,
-                  nextAgentVersionId,
-                  agencyConversationId,
-                  nextAgentConversation.agentConversationId,
-                  nextPrompt,
-                  onMessageFromAgent,
-                  onUpdateMessage,
-                )
-            }
-          })
-          if (envokeMind) {
-            await enqueue(envokeMind)
-            newIterationWillBeStarted = true
-          }
-        }
-
-        const nextEnvocation = await dequeue()
-        if (nextEnvocation) {
-          nextEnvocation()
-        }
+        // The following envokeMind queueing is used to start the next iteration,
+        // which was something that was used in AgencyAI to enable back and forth communication
+        // between agents. This is not needed in the current implementation.
+        // if (envokeMind) {
+        //   await enqueue(envokeMind)
+        //   newIterationWillBeStarted = true
+        // }
+        // const nextEnvocation = await dequeue()
+        // if (nextEnvocation) {
+        //   nextEnvocation()
+        // }
 
         // todo: When using Lambdas and SQS,
         //  the connection back to the client is held by a master server,
@@ -285,11 +230,6 @@ export default class AgentMind {
   }
 }
 
-type ToList = {
-  type: 'ToList',
-  to: Array<number | null>,
-}
-
 class RetryError extends Error {
   constructor(message: any) {
     super(message)
@@ -297,196 +237,29 @@ class RetryError extends Error {
   }
 }
 
-async function generateToListWithRetry(
-  openAiKey: string,
-  model: string,
-  messages: Array<MessageSQL>,
-  agentConversationId: string,
-  currentAgent: AgentSQL,
-  managerAgent: AgentSQL,
-  agentMap: { [agentId: number]: AgentSQL },
-  retryCount: number,
-): Promise<ToList> {
-  if (retryCount <= 0) {
-    throw new Error('Retry count exceeded.')
-  }
-
-  try {
-    return await generateToList(
-      openAiKey,
-      model,
-      messages,
-      currentAgent,
-      managerAgent,
-      agentMap,
-    )
-  } catch (err) {
-    console.error(err)
-
-    if (err instanceof RetryError) {
-      console.debug('retrying')
-
-      const systemMessageData: MessageData = {
-        correctionInstruction: true,
-        text: err.message,
-      }
-
-      const systemMessage = await MessageInterface.insert(
-        currentAgent.agentId,
-        agentConversationId,
-        MessageRole.SYSTEM,
-        systemMessageData,
-      )
-
-      return await generateToListWithRetry(
-        openAiKey,
-        model,
-        [...messages, systemMessage],
-        agentConversationId,
-        currentAgent,
-        managerAgent,
-        agentMap,
-        retryCount - 1,
-      )
-    }
-
-    throw err
-  }
-}
-
-async function generateToList(
-  openAiKey: string,
-  model: string,
-  messages: Array<MessageSQL>,
-  currentAgent: AgentSQL,
-  managerAgent: AgentSQL,
-  agentMap: { [agentId: number]: AgentSQL },
-): Promise<ToList> {
-  const isCurrentManager = currentAgent.agentId === managerAgent.agentId
-
-  // Format messages for /chat/completions:
-  const gptMessages: Array<GPTMessage> = messages.map((m) => ({
-    role: m.role.toLowerCase(),
-    content: m.data.text,
-  }))
-
-  const lastMessage = gptMessages.findLast(
-    (message) => message.role !== 'system',
-  )
-  if (!lastMessage) {
-    throw new Error('No last non-system message found.')
-  }
-  const lastMessageContent = JSON.parse(lastMessage.content)
-  if (lastMessageContent.type !== MessageType.GetToList) {
-    throw new Error('The last message must be a GetToList message.')
-  }
-
-  console.debug('generate ToList')
-  const res = await ChatGPTRest.chatCompletion(openAiKey, model, gptMessages)
-
-  const finishReason = res.choices[0]?.finish_reason
-
-  if (finishReason === 'length') {
-    throw new Error('The maximum number of tokens was reached.')
-  } else if (finishReason === 'content_filter') {
-    throw new Error('A content filter flag was raised.')
-  } else if (finishReason === 'tool_calls') {
-    throw new Error('Tool calls are not yet implemented.')
-  } else if (finishReason !== 'stop') {
-    throw new Error('Unknown finish reason.')
-  }
-
-  const text = res.choices[0]?.message?.content || ''
-
-  console.log('ToList:', text)
-
-  let parsedText
-  try {
-    parsedText = JSON.parse(text)
-  } catch (err) {
-    console.error(text)
-    throw new RetryError('The response could not be parsed into JSON.')
-  }
-
-  if (parsedText.type !== MessageType.ToList) {
-    console.error(text)
-    throw new RetryError(`The response must be a ToList.`)
-  }
-
-  if (!Array.isArray(parsedText.to)) {
-    console.error(text)
-    throw new RetryError(`The response must include a "to" array.`)
-  }
-
-  for (const agentId of parsedText.to) {
-    if (agentId !== null && typeof agentId !== 'number') {
-      console.error(text)
-      throw new RetryError(`The "to" array must contain only numbers or null.`)
-    }
-
-    if (agentId !== null && !agentMap[agentId]) {
-      throw new RetryError(
-        `The "to" array contained an agentId that does not exist.`,
-      )
-    }
-
-    if (!isCurrentManager && agentId === null) {
-      throw new RetryError(
-        `The "to" array contained null, signifying the intent to send a message to the end user, but only the manager agent can do this.`,
-      )
-    }
-  }
-
-  return parsedText
-}
-
 function generateResponse(
-  openAiKey: string,
+  user: UserSQL,
   agencyId: number,
   agent: AgentSQL,
   managerAgent: AgentSQL,
   agencyConversationId: string,
   agentConversationId: string,
-  messages: Array<MessageSQL>,
-  forAgentVersionId: number | null,
+  context: Array<GPTMessage>,
   onAppendMessage: (output: AppendMessageOutput) => any,
   onUpdateMessage: (output: UpdateMessageOutput) => any,
 ): Promise<MessageSQL> {
   return new Promise(async (resolve, reject) => {
     try {
-      const getResponseMessageData: MessageData = {
-        internalInstruction: true,
-        text: JSON.stringify({
-          type: 'GetResponse',
-          for: forAgentVersionId,
-        }),
-      }
-
-      const getResponseMessage = await MessageInterface.insert(
-        agent.agentId,
-        agentConversationId,
-        MessageRole.SYSTEM,
-        getResponseMessageData,
-      )
-
-      // Format messages for /chat/completions:
-      const gptMessages: Array<GPTMessage> = [
-        ...messages,
-        getResponseMessage,
-      ].map((m) => ({
-        role: m.role.toLowerCase(),
-        content: m.data.text,
-      }))
-
-      const intro = `{"type":"Response","text":"`
-
-      // MessageData uses the versionId rather than the agentId
+      // In this mod of AgencyAI, all messages go to the end user.
+      // There is also no JSON mode.
       const responseMessageData: MessageData = {
         fromAgentId: agent.versionId,
-        toAgentId: forAgentVersionId === null ? null : forAgentVersionId,
-        toApi: forAgentVersionId === null,
-        text: intro + `"}`,
+        toAgentId: null,
+        toApi: true,
+        text: '',
       }
+
+      // The response is already added to the database before streaming starts as an empty message.
       const responseMessage = await MessageInterface.insert(
         agent.agentId,
         agentConversationId,
@@ -494,6 +267,8 @@ function generateResponse(
         responseMessageData,
       )
       responseMessage.id = responseMessage.messageId.toString()
+
+      // Similarly the response is sent to the client as an empty message to start.
       const output: AppendMessageOutput = {
         agencyId,
         chatId: agencyConversationId,
@@ -518,20 +293,19 @@ function generateResponse(
         timeout = setTimeout(() => {
           // todo: If timeout,
           //  then retry without system message.
-          //  But maybe this isn't needed because ChatGPTRest.relayChatCompletionStream already does 3 retries.
+          //  But maybe this isn't needed because InferenceRest.relayChatCompletionStream already does 3 retries.
           stop = true
           const error = new Error('Event stream timeout.')
           reject(error)
-        }, 10000) // 10 seconds
+        }, 30000) // 30 seconds
       }
 
       startTimeout()
 
       // Send a /chat/completions call
-      ChatGPTRest.relayChatCompletionStream(
-        openAiKey,
-        agent.model,
-        gptMessages,
+      InferenceRest.relayChatCompletionStream(
+        user,
+        context,
         (res: ChatCompletionsResponse) => {
           if (stop) {
             return
@@ -559,18 +333,21 @@ function generateResponse(
             throw error
           }
 
-          // todo: check if finish_reason=stop always has an empty delta. Do not send a token update if it does.
+          // todo: check if finish_reason=stop always has an empty delta.
+          //  Do not send a token update if it does as this would be redundant.
 
           const text = res?.choices[0]?.delta?.content || ''
 
           buffer += text
 
-          if (buffer.length < intro.length) {
-            // The buffer is not long enough to contain the intro.
-            return
-          }
+          // Used for JSON mode:
+          // if (buffer.length < intro.length) {
+          //   // The buffer is not long enough to contain the intro.
+          //   return
+          // }
+          // const autocompletion = JSON.stringify(parseIncompleteJSON(buffer))
 
-          const autocompletion = JSON.stringify(parseIncompleteJSON(buffer))
+          const autocompletion = buffer
 
           const messageChanged = autocompletion !== previousAutocompletion
           previousAutocompletion = autocompletion

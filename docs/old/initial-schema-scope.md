@@ -1,5 +1,7 @@
 # Initial Schema Scope
 
+This is the initial scope for AgencyAI. This project reuses the codebase for AgencyAI, so this documentation may still be relevant.
+
 This is a SaaS app which is a simple UI for managing and building multiagent AI systems.
 
 Here is a rough outline of the how the app works technically:

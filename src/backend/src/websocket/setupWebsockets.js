@@ -134,37 +134,38 @@ export default function setupWebsockets(app: any): any {
           session.userId,
         )
       } else if (socket.handshake.query.accessKey) {
-        const agencyId = socket.handshake.query.agencyId
-        if (!agencyId) {
-          throw new Error(
-            'You must specify which agencyId you want to listen to.',
-          )
-        }
-
-        const authKey = await AuthTokenInterface.getByToken(
-          socket.handshake.query.accessKey,
-        )
-        if (!authKey) {
-          throw new Error('Unauthorized')
-        }
-        const agencyVersions = await AgencyInterface.getActiveVersions(
-          authKey.agencyVersionId,
-        )
-        // This verifies the agency version associated with the auth token contains the agency id.
-        listenToAgency = agencyVersions.find(
-          (agency) => agency.agencyId === agencyId,
-        )
-        if (!listenToAgency) {
-          throw new Error('Unauthorized')
-        }
-        user = await UserInterface.getUser(listenToAgency?.userId)
-
-        const isTrialKey = user?.openAiKey === Config.openAiPublicTrialKey
-        if (isTrialKey) {
-          throw new Error(
-            'When using the trial key, you cannot use the publish API with permanent keys.',
-          )
-        }
+        throw new Error('accessKey is no longer supported')
+        // const agencyId = socket.handshake.query.agencyId
+        // if (!agencyId) {
+        //   throw new Error(
+        //     'You must specify which agencyId you want to listen to.',
+        //   )
+        // }
+        //
+        // const authKey = await AuthTokenInterface.getByToken(
+        //   socket.handshake.query.accessKey,
+        // )
+        // if (!authKey) {
+        //   throw new Error('Unauthorized')
+        // }
+        // const agencyVersions = await AgencyInterface.getActiveVersions(
+        //   authKey.agencyVersionId,
+        // )
+        // // This verifies the agency version associated with the auth token contains the agency id.
+        // listenToAgency = agencyVersions.find(
+        //   (agency) => agency.agencyId === agencyId,
+        // )
+        // if (!listenToAgency) {
+        //   throw new Error('Unauthorized')
+        // }
+        // user = await UserInterface.getUser(listenToAgency?.userId)
+        //
+        // const isTrialKey = user?.openAiKey === Config.openAiPublicTrialKey
+        // if (isTrialKey) {
+        //   throw new Error(
+        //     'When using the trial key, you cannot use the publish API with permanent keys.',
+        //   )
+        // }
       } else {
         throw new Error('Unauthorized')
       }
@@ -177,9 +178,21 @@ export default function setupWebsockets(app: any): any {
         throw new Error('Unauthorized')
       }
 
-      const openAiKey = user?.openAiKey
-      if (!openAiKey) {
+      // const openAiKey = user?.openAiKey
+      // if (!openAiKey) {
+      //   throw new Error('Unauthorized')
+      // }
+      const apiBase = user?.inferenceServerConfig?.apiBase
+      if (!apiBase) {
         throw new Error('Unauthorized')
+      }
+      const apiKey = user?.inferenceServerConfig?.apiKey
+      const isOpenAi =
+        user?.inferenceServerConfig?.apiBase === 'https://api.openai.com'
+      if (isOpenAi) {
+        if (!apiKey) {
+          throw new Error('Unauthorized')
+        }
       }
 
       socket.custom = {

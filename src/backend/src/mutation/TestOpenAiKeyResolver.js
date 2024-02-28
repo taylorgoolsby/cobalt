@@ -2,7 +2,7 @@
 
 import gql from 'graphql-tag'
 import { unpackSession } from '../utils/Token.js'
-import ChatGPTRest from '../rest/ChatGPTRest.js'
+import InferenceRest from '../rest/InferenceRest.js'
 
 type TestOpenAiKeyInput = {
   sessionToken: string,
@@ -34,7 +34,7 @@ export async function resolver(
 
   if (openAiKey) {
     // If this call does not error out, then the key is good.
-    const models = await ChatGPTRest.getAvailableModels(openAiKey)
+    const models = await InferenceRest.getAvailableModels(openAiKey)
   }
 
   return {

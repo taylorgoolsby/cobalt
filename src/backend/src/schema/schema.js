@@ -25,7 +25,7 @@ import * as Mutation from '../mutation/Mutation.js'
 import type { ResolverDefs } from '../utils/resolver.js'
 import resolver from '../utils/resolver.js'
 import createViewer from '../utils/createViewer.js'
-import ChatGPTRest from '../rest/ChatGPTRest.js'
+import InferenceRest from '../rest/InferenceRest.js'
 import UserInterface from './User/UserInterface.js'
 
 const { idDirectiveTransformer } = createIdDirective('id')
@@ -93,7 +93,9 @@ export const resolvers: ResolverDefs = {
           if (user?.openAiKey) {
             // Sometimes the OpenAI call to get models fails, so this is why it is denormalized
             // and in try-catch block.
-            const models = await ChatGPTRest.getAvailableModels(user.openAiKey)
+            const models = await InferenceRest.getAvailableModels(
+              user.openAiKey,
+            )
             await UserInterface.updateGptModels(user.userId, models)
           }
         }

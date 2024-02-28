@@ -3,7 +3,7 @@
 import type { InstructionSQL } from '../schema/Instruction/InstructionSchema.js'
 import gql from 'graphql-tag'
 import { unpackSession } from '../utils/Token.js'
-import ChatGPTRest from '../rest/ChatGPTRest.js'
+import InferenceRest from '../rest/InferenceRest.js'
 import UserInterface from '../schema/User/UserInterface.js'
 import AgentInterface from '../schema/Agent/AgentInterface.js'
 import InstructionInterface from '../schema/Instruction/InstructionInterface.js'

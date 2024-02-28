@@ -15,9 +15,21 @@ const newChatHandler = async (
   data: NewChatInput,
 ): Promise<string> => {
   console.debug('newChat', data)
-  const openAiKey = user?.openAiKey
-  if (!openAiKey) {
+  // const openAiKey = user?.openAiKey
+  // if (!openAiKey) {
+  //   throw new Error('Unauthorized')
+  // }
+  const apiBase = user?.inferenceServerConfig?.apiBase
+  if (!apiBase) {
     throw new Error('Unauthorized')
+  }
+  const apiKey = user?.inferenceServerConfig?.apiKey
+  const isOpenAi =
+    user?.inferenceServerConfig?.apiBase === 'https://api.openai.com'
+  if (isOpenAi) {
+    if (!apiKey) {
+      throw new Error('Unauthorized')
+    }
   }
 
   if (!data.agencyId) {
@@ -66,7 +78,6 @@ const newChatHandler = async (
         newChatOutput.chatId,
         managerAgentId,
         user,
-        openAiKey,
         'New Chat',
         data.userPrompt,
       )
@@ -81,8 +92,7 @@ const newChatHandler = async (
   // This can fire off additional iterations,
   // so this starts off long running asynchronous process:
   AgentMind.chatIteration(
-    user.userId,
-    openAiKey,
+    user,
     data.agencyId,
     managerVersionId,
     newChatOutput.chatId,

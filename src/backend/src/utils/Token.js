@@ -2,7 +2,7 @@
 
 import * as jose from 'jose'
 import Config from 'common/src/Config.js'
-import ChatGPTRest from '../rest/ChatGPTRest.js'
+import InferenceRest from '../rest/InferenceRest.js'
 import UserInterface from '../schema/User/UserInterface.js'
 
 export const OAuthProviders = {
