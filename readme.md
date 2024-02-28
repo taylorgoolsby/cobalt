@@ -4,7 +4,7 @@ This project uses a RAG technique to implement long term memory. There is also a
 
 ## Use Cases
 
-This is useful as a convenience in some cases, and in others, it may be crucial.
+A chatbot which runs as a single chat window is useful as a convenience in some cases, and in others, it may be crucial.
 
 ### No Chat Management
 
@@ -26,13 +26,13 @@ An option for users of AI to be able to use AI without having to worry about the
 
 ## Short Term Memory
 
-By giving the chatbot short term, limitations imposed by token limit can be overcome. As a comparison, an implemention of a chatbot that uses a sliding context window where past messages are simply truncated causes the bot to forget the beginning of the conversation, leading to innacurate responses. Important instructions established at the beginning of the conversation may be lost, leading the AI to suddenly behave as if it had never received those instructions. 
+By giving the chatbot short term memory, limitations imposed by token limit can be overcome. As a comparison, an implemention of a chatbot that uses a sliding context window where past messages are simply truncated causes the bot to forget the beginning of the conversation, leading to innacurate responses. Important instructions established at the beginning of the conversation may be lost, leading the AI to suddenly behave as if it had never received those instructions. 
 
-Here, a sliding window is still used, but truncated messages are summarized into a section of the context window dedicated to the short term memory summary. If we can fine-tune a model to perform short term memory summarization well, then the AI will be able to remember the important details or instructions of the cnversation, even if the messages where those details were initally introduces have been truncated.
+Here, a sliding window is still used, but truncated messages are summarized into a section of the context window dedicated to the short term memory summary. If we can fine-tune a model to perform short term memory summarization well, then the AI will be able to remember the important details or instructions of the conversation, even if the messages where those details were initally introduced have been truncated.
 
 ## Long Term Memory
 
-To support features such as knowledge base management, brainstorming, and providing tailored suggestions, a long term memory system is needed. This is a system which can remember information from past conversations and use that information to inform future conversations.
+To support features such as knowledge base management, a long term memory system is needed. This is a system which can remember information from past conversations and use that information to inform future conversations.
 
 The RAG technique is used to implement long term memory. All user inputs are annotated with vector embeddings, and then when a new user input is received, a section in the context window dedicated to long term memory is updated with relevant information. This section is then used to inform the AI's response.
 
