@@ -92,7 +92,10 @@ export default class AgentMind {
           agentConversationId,
         )
 
-        const context: Array<GPTMessage> = []
+        const context: Array<GPTMessage> = startingMessages.map((m) => ({
+          role: m.role.toLowerCase(),
+          content: m.data.text,
+        }))
 
         let newIterationWillBeStarted = false
 

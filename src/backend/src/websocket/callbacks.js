@@ -301,41 +301,50 @@ export async function getCallbacks(
 
       const subOutputs: Array<FlatAppendMessageOutput> = []
 
-      const parsedText = JSON.parse(output.message.data.text)
-      if (parsedText.type === MessageType.GetToList) {
-        // A GetToList message is a simple /chat/completions call which may contain multiple responses from other agents.
-        // Before delivering to the client, we will split these up into individual messages.
-        const getToListMessage: GetToListMessage = parsedText
-        for (const subMessage of getToListMessage.messages) {
-          const subOutput: FlatAppendMessageOutput = {
-            ...output,
-            message: {
-              ...output.message,
-              ...output.message.data,
-              fromAgentId: subMessage.from,
-              fromApi: subMessage.from === null,
-              text: subMessage.text,
-            },
-          }
-          delete subOutput.message.data
-          subOutputs.push(subOutput)
-        }
-      } else if (parsedText.type === MessageType.Response) {
-        const responseMessage: ResponseMessage = parsedText
-        const subOutput: FlatAppendMessageOutput = {
-          ...output,
-          message: {
-            ...output.message,
-            ...output.message.data,
-            text: responseMessage.text,
-          },
-        }
-        delete subOutput.message.data
-        subOutputs.push(subOutput)
-      } else {
-        console.error(`Unexpected message type: ${parsedText.type}`)
-        return
+      // const parsedText = JSON.parse(output.message.data.text)
+      // if (parsedText.type === MessageType.GetToList) {
+      //   // A GetToList message is a simple /chat/completions call which may contain multiple responses from other agents.
+      //   // Before delivering to the client, we will split these up into individual messages.
+      //   const getToListMessage: GetToListMessage = parsedText
+      //   for (const subMessage of getToListMessage.messages) {
+      //     const subOutput: FlatAppendMessageOutput = {
+      //       ...output,
+      //       message: {
+      //         ...output.message,
+      //         ...output.message.data,
+      //         fromAgentId: subMessage.from,
+      //         fromApi: subMessage.from === null,
+      //         text: subMessage.text,
+      //       },
+      //     }
+      //     delete subOutput.message.data
+      //     subOutputs.push(subOutput)
+      //   }
+      // } else if (parsedText.type === MessageType.Response) {
+      //   const responseMessage: ResponseMessage = parsedText
+      //   const subOutput: FlatAppendMessageOutput = {
+      //     ...output,
+      //     message: {
+      //       ...output.message,
+      //       ...output.message.data,
+      //       text: responseMessage.text,
+      //     },
+      //   }
+      //   delete subOutput.message.data
+      //   subOutputs.push(subOutput)
+      // } else {
+      //   console.error(`Unexpected message type: ${parsedText.type}`)
+      //   return
+      // }
+      const subOutput: FlatAppendMessageOutput = {
+        ...output,
+        message: {
+          ...output.message,
+          ...output.message.data,
+        },
       }
+      delete subOutput.message.data
+      subOutputs.push(subOutput)
 
       for (const subOutput of subOutputs) {
         const sockets: Array<any> = Object.values(socketRegistry[userId] || {})
@@ -390,41 +399,50 @@ export async function getCallbacks(
 
       const subOutputs: Array<FlatUpdateMessageOutput> = []
 
-      const parsedText = JSON.parse(output.message.data.text)
-      if (parsedText.type === MessageType.GetToList) {
-        // A GetToList message is a simple /chat/completions call which may contain multiple responses from other agents.
-        // Before delivering to the client, we will split these up into individual messages.
-        const getToListMessage: GetToListMessage = parsedText
-        for (const subMessage of getToListMessage.messages) {
-          const subOutput: FlatUpdateMessageOutput = {
-            ...output,
-            message: {
-              ...output.message,
-              ...output.message.data,
-              fromAgentId: subMessage.from,
-              fromApi: subMessage.from === null,
-              text: subMessage.text,
-            },
-          }
-          delete subOutput.message.data
-          subOutputs.push(subOutput)
-        }
-      } else if (parsedText.type === MessageType.Response) {
-        const responseMessage: ResponseMessage = parsedText
-        const subOutput: FlatUpdateMessageOutput = {
-          ...output,
-          message: {
-            ...output.message,
-            ...output.message.data,
-            text: responseMessage.text,
-          },
-        }
-        delete subOutput.message.data
-        subOutputs.push(subOutput)
-      } else {
-        console.error(`Unexpected message type: ${parsedText.type}`)
-        return
+      // const parsedText = JSON.parse(output.message.data.text)
+      // if (parsedText.type === MessageType.GetToList) {
+      //   // A GetToList message is a simple /chat/completions call which may contain multiple responses from other agents.
+      //   // Before delivering to the client, we will split these up into individual messages.
+      //   const getToListMessage: GetToListMessage = parsedText
+      //   for (const subMessage of getToListMessage.messages) {
+      //     const subOutput: FlatUpdateMessageOutput = {
+      //       ...output,
+      //       message: {
+      //         ...output.message,
+      //         ...output.message.data,
+      //         fromAgentId: subMessage.from,
+      //         fromApi: subMessage.from === null,
+      //         text: subMessage.text,
+      //       },
+      //     }
+      //     delete subOutput.message.data
+      //     subOutputs.push(subOutput)
+      //   }
+      // } else if (parsedText.type === MessageType.Response) {
+      //   const responseMessage: ResponseMessage = parsedText
+      //   const subOutput: FlatUpdateMessageOutput = {
+      //     ...output,
+      //     message: {
+      //       ...output.message,
+      //       ...output.message.data,
+      //       text: responseMessage.text,
+      //     },
+      //   }
+      //   delete subOutput.message.data
+      //   subOutputs.push(subOutput)
+      // } else {
+      //   console.error(`Unexpected message type: ${parsedText.type}`)
+      //   return
+      // }
+      const subOutput: FlatUpdateMessageOutput = {
+        ...output,
+        message: {
+          ...output.message,
+          ...output.message.data,
+        },
       }
+      delete subOutput.message.data
+      subOutputs.push(subOutput)
 
       for (const subOutput of subOutputs) {
         const sockets: Array<any> = Object.values(socketRegistry[userId] || {})

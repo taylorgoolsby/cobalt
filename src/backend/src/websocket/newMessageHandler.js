@@ -106,15 +106,7 @@ async function newMessageHandler(user: UserSQL, data: NewMessageInput) {
   const userMessageData: MessageData = {
     fromApi: true,
     toAgentId: managerAgentConversation.agentId,
-    text: JSON.stringify({
-      type: MessageType.GetToList,
-      messages: [
-        {
-          from: null,
-          text: data.userPrompt,
-        },
-      ],
-    }),
+    text: data.userPrompt,
   }
   const userMessage: MessageSQL = await MessageInterface.insert(
     managerAgentConversation.agentId,
@@ -122,6 +114,8 @@ async function newMessageHandler(user: UserSQL, data: NewMessageInput) {
     MessageRole.USER,
     userMessageData,
   )
+
+  console.log('userMessage', userMessage)
 
   // Send this message to the client so that it can be displayed.
   const output: AppendMessageOutput = {

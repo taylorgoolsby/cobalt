@@ -255,15 +255,7 @@ export async function createNewChat(
   userMessage = {
     fromApi: true,
     toAgentId: managerAgent.versionId,
-    text: JSON.stringify({
-      type: MessageType.GetToList,
-      messages: [
-        {
-          from: null,
-          text: userPrompt,
-        },
-      ],
-    }),
+    text: userPrompt,
   }
   const firstChatMessage = await MessageInterface.insert(
     managerAgent.agentId,
