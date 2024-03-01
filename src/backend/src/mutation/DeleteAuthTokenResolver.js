@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import AuthTokenInterface from '../schema/AuthToken/AuthTokenInterface.js'
 import AgencyInterface from '../schema/Agency/AgencyInterface.js'
 import type { UserSQL } from '../schema/User/UserSchema.js'
@@ -36,7 +36,7 @@ export async function resolver(
   ctx: any,
 ): Promise<DeleteAuthTokenResponse> {
   const { sessionToken, authTokenId } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   // Verify the user owns the auth token
 

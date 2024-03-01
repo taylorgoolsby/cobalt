@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import type { AgentSQL } from '../schema/Agent/AgentSchema.js'
 import type { AgencySQL } from '../schema/Agency/AgencySchema.js'
 import AgencyInterface from '../schema/Agency/AgencyInterface.js'
@@ -37,7 +37,7 @@ export async function resolver(
   ctx: any,
 ): Promise<UpdateAgencyResponse> {
   const { sessionToken, agencyId, agents } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   const agency = await AgencyInterface.getOwned(agencyId, session.userId)
   if (!agency) {

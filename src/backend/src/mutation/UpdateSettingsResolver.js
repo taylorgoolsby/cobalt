@@ -3,7 +3,7 @@
 import gql from 'graphql-tag'
 import type { UserSQL } from '../schema/User/UserSchema.js'
 import UserInterface from '../schema/User/UserInterface.js'
-import { unpackMfaToken, unpackSession } from '../utils/Token.js'
+import { unpackMfaToken, unpackSessionToken } from '../utils/Token.js'
 import nonMaybe from 'non-maybe'
 import Phone from '../utils/Phone.js'
 import Security from '../utils/Security.js'
@@ -75,7 +75,7 @@ export async function resolver(
       // password,
     } = args.input
     let apiBase = args.input.apiBase
-    const session = await unpackSession(sessionToken, ctx)
+    const session = await unpackSessionToken(sessionToken, ctx)
 
     const existingUser = await UserInterface.getUser(session.userId)
     if (!existingUser) {

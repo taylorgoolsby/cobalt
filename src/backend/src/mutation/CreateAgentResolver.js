@@ -2,7 +2,7 @@
 
 import type { InstructionSQL } from '../schema/Instruction/InstructionSchema.js'
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import InferenceRest from '../rest/InferenceRest.js'
 import UserInterface from '../schema/User/UserInterface.js'
 import AgentInterface from '../schema/Agent/AgentInterface.js'
@@ -58,7 +58,7 @@ export async function resolver(
 ): Promise<CreateAgentResponse> {
   const { sessionToken, agencyId, model, name, orderIndex, instructions } =
     args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   if (!name) {
     throw new Error('Please enter an agent name.')
@@ -119,17 +119,17 @@ export async function resolver(
   const createInstructions: Array<InstructionSQL> = []
 
   if (!options?.agencyCreation) {
-    createInstructions.push({
-      instructionId: '',
-      agentId: 0,
-      clause: 'You will receive instructions from the manager.',
-      orderIndex: 0,
-      canEdit: false,
-      isInternal: false,
-      isDeleted: false,
-      dateUpdated: '',
-      dateCreated: '',
-    })
+    // createInstructions.push({
+    //   instructionId: '',
+    //   agentId: 0,
+    //   clause: 'You will receive instructions from the manager.',
+    //   orderIndex: 0,
+    //   canEdit: false,
+    //   isInternal: false,
+    //   isDeleted: false,
+    //   dateUpdated: '',
+    //   dateCreated: '',
+    // })
   }
 
   for (let i = 0; i < instructions.length; i++) {
@@ -149,7 +149,7 @@ export async function resolver(
 
     // The first instruction from the client should be the
     // 'You will receive instructions from the manager.' instruction.
-    if (i !== 0) {
+    if (i !== 0 || options?.agencyCreation) {
       // User defined instructions are placed after the internal instructions:
       createInstructions.push(instruction)
     }

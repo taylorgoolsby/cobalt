@@ -42,6 +42,7 @@ class SessionStore {
     loading: boolean,
     loaded: boolean,
     isLoggedIn: boolean,
+    sessionToken?: ?string,
   } = {
     loading: false,
     loaded: false,
@@ -128,8 +129,12 @@ class SessionStore {
       const sessionToken = browserStore.get('sessionToken')
       if (sessionToken) {
         this.storeSessionToken(sessionToken)
-        console.warn('loaded sessionToken from browser')
         this.attemptTimeout()
+        if (this.sessionToken) {
+          // If still logged in, the token stored in the browser is old, so attempt a refresh.
+          this.refreshSessionToken()
+        }
+        console.warn('loaded sessionToken from browser')
       }
     } catch (err) {
       console.error(err)
@@ -137,6 +142,17 @@ class SessionStore {
       this.observables.loading = false
       this.observables.loaded = true
     }
+  }
+
+  refreshSessionToken() {
+    Promise.resolve().then(async () => {
+      try {
+        if (!this.sessionToken) return
+        await this.exchangeSessionToken({ refreshToken: this.sessionToken })
+      } catch (err) {
+        console.error(err)
+      }
+    })
   }
 
   async exchangeSessionToken(
@@ -148,6 +164,7 @@ class SessionStore {
     let sessionToken
     try {
       sessionToken = await getSessionToken(input)
+      console.log('exchanged sessionToken', sessionToken)
       if (sessionToken) {
         const previousSessionToken = browserStore.get('sessionToken')
         if (merging && previousSessionToken) {
@@ -174,6 +191,7 @@ class SessionStore {
     } catch (err) {
       console.error(err)
       showErrorModal(err.message)
+      this.logout()
     } finally {
       this.observables.loading = false
       this.observables.loaded = true
@@ -191,9 +209,12 @@ class SessionStore {
       this.sessionToken = sessionToken
       this.session = decoded
       this.observables.isLoggedIn = !!sessionToken // causes reactions
+      this.observables.sessionToken = sessionToken
       browserStore.set('sessionToken', sessionToken)
       console.warn('new sessionToken set', decoded)
       if (sessionToken) {
+        console.log('websocket sessionToken', sessionToken)
+        disconnect()
         establishSocket(sessionToken)
       }
     } catch (err) {

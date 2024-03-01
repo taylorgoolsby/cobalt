@@ -48,6 +48,7 @@ import AgentConversationInterface from '../schema/AgentConversation/AgentConvers
 import { getCallbacks } from '../websocket/callbacks.js'
 import { dequeue, enqueue } from './mindQueue.js'
 import type { UserSQL } from '../schema/User/UserSchema.js'
+import { encodeChat } from 'gpt-tokenizer'
 
 export default class AgentMind {
   static chatIteration(
@@ -92,10 +93,19 @@ export default class AgentMind {
           agentConversationId,
         )
 
+        const truncatedMessages = startingMessages.slice(0, -1)
+        const lastMessage = startingMessages[startingMessages.length - 1]
+
+        console.log('truncatedMessages', truncatedMessages)
+        console.log('lastMessage', lastMessage)
+
         const context: Array<GPTMessage> = startingMessages.map((m) => ({
           role: m.role.toLowerCase(),
           content: m.data.text,
         }))
+
+        const tokens = encodeChat(context, 'gpt-3.5-turbo')
+        console.log('tokens', tokens.length)
 
         let newIterationWillBeStarted = false
 

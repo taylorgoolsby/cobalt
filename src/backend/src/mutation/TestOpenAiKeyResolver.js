@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import InferenceRest from '../rest/InferenceRest.js'
 
 type TestOpenAiKeyInput = {
@@ -30,7 +30,7 @@ export async function resolver(
   ctx: any,
 ): Promise<TestOpenAiKeyResponse> {
   const { sessionToken, openAiKey } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   if (openAiKey) {
     // If this call does not error out, then the key is good.

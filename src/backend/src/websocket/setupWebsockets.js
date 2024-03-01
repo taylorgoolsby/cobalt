@@ -113,26 +113,30 @@ export default function setupWebsockets(app: any): any {
       let user: ?UserSQL
       if (socket.handshake.query.sessionToken) {
         const sessionToken = socket.handshake.query.sessionToken
+        console.log('sessionToken', sessionToken)
         const session: SessionToken = await createViewer(sessionToken, {})
+        console.log('session', session)
         user = await UserInterface.getUser(session.userId)
+        console.log('user', user)
         listenToEverything = true
       } else if (socket.handshake.query.demoSessionToken) {
-        const agencyId = parseInt(socket.handshake.query.agencyId)
-        if (!agencyId) {
-          throw new Error(
-            'You must specify which agencyId you want to listen to.',
-          )
-        }
-        const demoSessionToken = socket.handshake.query.demoSessionToken
-        const session = await unpackDemoSessionToken(demoSessionToken)
-        if (session.demoAgencyId !== agencyId) {
-          throw new Error('Unauthorized')
-        }
-        user = await UserInterface.getUser(session.userId)
-        listenToAgency = await AgencyInterface.getOwned(
-          session.demoAgencyId,
-          session.userId,
-        )
+        throw new Error('demoSessionToken is no longer supported')
+        // const agencyId = parseInt(socket.handshake.query.agencyId)
+        // if (!agencyId) {
+        //   throw new Error(
+        //     'You must specify which agencyId you want to listen to.',
+        //   )
+        // }
+        // const demoSessionToken = socket.handshake.query.demoSessionToken
+        // const session = await unpackDemoSessionToken(demoSessionToken)
+        // if (session.demoAgencyId !== agencyId) {
+        //   throw new Error('Unauthorized')
+        // }
+        // user = await UserInterface.getUser(session.userId)
+        // listenToAgency = await AgencyInterface.getOwned(
+        //   session.demoAgencyId,
+        //   session.userId,
+        // )
       } else if (socket.handshake.query.accessKey) {
         throw new Error('accessKey is no longer supported')
         // const agencyId = socket.handshake.query.agencyId

@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import createViewer from '../utils/createViewer.js'
 import AgencyInterface from '../schema/Agency/AgencyInterface.js'
 
@@ -33,7 +33,7 @@ export async function resolver(
   ctx: any,
 ): Promise<DeleteAgencyResponse> {
   const { sessionToken, agencyId } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   // Verify agencyId belongs to session userId
   const agency = await AgencyInterface.getOwned(agencyId, session.userId)

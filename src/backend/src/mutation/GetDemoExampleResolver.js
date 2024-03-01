@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import demoExample from '../demoExample.js'
 import { resolver as getDemoSessionToken } from './GetDemoSessionTokenResolver.js'
 import Config from 'common/src/Config.js'
@@ -34,7 +34,7 @@ export async function resolver(
   ctx: any,
 ): Promise<GetDemoExampleResponse> {
   const { sessionToken, agencyId } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   // Verifies user owns agencyId:
   const { demoSessionToken } = await getDemoSessionToken(

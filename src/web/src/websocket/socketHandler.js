@@ -8,6 +8,7 @@ import debounce from 'lodash.debounce'
 
 let socket: any
 let reconnectTimeout: any
+let sessionToken: any
 
 export type NewChatInput = {
   agencyId: number,
@@ -72,6 +73,7 @@ export function disconnect() {
   if (socket?.connected) {
     socket.disconnect()
     socket = null
+    sessionToken = null
   }
 }
 
@@ -144,7 +146,8 @@ export function setReconnectCallback(callback: ?() => any) {
   onReconnect = callback
 }
 
-export function establishSocket(sessionToken: string): void {
+export function establishSocket(inputSessionToken: ?string): void {
+  sessionToken = inputSessionToken
   if (!sessionToken) return
   console.log('establishSocket')
   if (socket) {

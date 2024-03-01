@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import Twilio from '../rest/Twilio.js'
 import Security from '../utils/Security.js'
 import MfaCodeEmail from '../email/templates/MfaCodeEmail.js'
@@ -37,7 +37,7 @@ export async function resolver(
   ctx: any,
 ): Promise<SendMfaCodeResponse> {
   const { sessionToken, email, phoneCallingCode, phoneNumber } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   await sendCode({
     userId: session.userId,

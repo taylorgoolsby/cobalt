@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { createSessionToken, unpackSession } from '../utils/Token.js'
+import { createSessionToken, unpackSessionToken } from '../utils/Token.js'
 import UserInterface from '../schema/User/UserInterface.js'
 
 type MergeAccountsInput = {
@@ -35,8 +35,8 @@ export async function resolver(
 ): Promise<MergeAccountsResponse> {
   const { currentSessionToken, previousSessionToken } = args.input
 
-  const currentSession = await unpackSession(currentSessionToken, {})
-  const previousSession = await unpackSession(previousSessionToken, {})
+  const currentSession = await unpackSessionToken(currentSessionToken, {})
+  const previousSession = await unpackSessionToken(previousSessionToken, {})
 
   if (currentSession.userId === previousSession.userId) {
     return {

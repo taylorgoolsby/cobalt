@@ -182,7 +182,7 @@ export async function createSessionToken(userId: string): Promise<string> {
   return token
 }
 
-export async function unpackSession(
+export async function unpackSessionToken(
   sessionToken: string,
   ctx: any,
 ): Promise<SessionToken> {
@@ -192,7 +192,7 @@ export async function unpackSession(
     '',
   )
 
-  if (!ctx.session) {
+  if (ctx && !ctx.session) {
     ctx.session = session
     ctx.isAuthenticated = true
   }

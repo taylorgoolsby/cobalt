@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import AgencyInterface from '../schema/Agency/AgencyInterface.js'
 import AuthTokenInterface from '../schema/AuthToken/AuthTokenInterface.js'
 import type { UserSQL } from '../schema/User/UserSchema.js'
@@ -41,7 +41,7 @@ export async function resolver(
   ctx: any,
 ): Promise<CreateAuthTokenResponse> {
   const { sessionToken, agencyId, name } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   // Verify that the agency exists and that the user owns it
   const agency = await AgencyInterface.getOwned(agencyId, session.userId)

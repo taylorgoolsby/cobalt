@@ -356,6 +356,7 @@ input OfflineCreateOrStartUserInput {
 type OfflineCreateOrStartUserResponse {
   success: Boolean!
   passwordToken: String!
+  userCreated: Boolean!
 }
 
 input SendMfaCodeInput {

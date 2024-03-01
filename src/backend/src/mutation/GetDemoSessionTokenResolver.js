@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { createDemoSessionToken, unpackSession } from '../utils/Token.js'
+import { createDemoSessionToken, unpackSessionToken } from '../utils/Token.js'
 import AgencyInterface from '../schema/Agency/AgencyInterface.js'
 
 type GetDemoSessionTokenInput = {
@@ -32,7 +32,7 @@ export async function resolver(
   ctx: any,
 ): Promise<GetDemoSessionTokenResponse> {
   const { sessionToken, agencyId } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   if (!agencyId || typeof agencyId !== 'number') {
     throw new Error('agencyId must be a number')

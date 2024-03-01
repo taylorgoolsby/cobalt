@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import type { InstructionSQL } from '../schema/Instruction/InstructionSchema.js'
 import AgencyInterface from '../schema/Agency/AgencyInterface.js'
 import AgentInterface from '../schema/Agent/AgentInterface.js'
@@ -62,7 +62,7 @@ export async function resolver(
     orderIndex,
     instructions,
   } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   if (!Array.isArray(instructions)) {
     throw new Error('Instructions must be an array')

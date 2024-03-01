@@ -114,7 +114,6 @@ const Onboarding: any = () => {
           value={apiKey}
           onInput={handleApiKeyChange}
           onEnterPress={submitChanges}
-          autoFocus
         />
         <LineBreak />
         <ButtonSquared

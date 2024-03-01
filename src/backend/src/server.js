@@ -1,5 +1,9 @@
 // @flow
 
+/*
+ * I apologize for the mess.
+ * */
+
 import type { AgencySQL } from './schema/Agency/AgencySchema.js'
 import connectDataTransferLog from './rest/connectDataTransferLog.js'
 import './utils/Logmix.js'
@@ -18,7 +22,7 @@ import fileUpload from 'express-fileupload'
 import OAuth from './utils/OAuth.js'
 import Config from 'common/src/Config.js'
 import {
-  unpackSession,
+  unpackSessionToken,
   createOauthToken,
   OAuthProviders,
   unpackDemoSessionToken,
@@ -187,7 +191,7 @@ handleAuthentication(app, {
       throw new Error('Unauthorized')
     }
 
-    const session = await unpackSession(sessionToken, {})
+    const session = await unpackSessionToken(sessionToken, {})
     if (!session) {
       throw new Error('Unauthorized')
     }

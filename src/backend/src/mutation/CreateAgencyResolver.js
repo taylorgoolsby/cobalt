@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import { unpackSession } from '../utils/Token.js'
+import { unpackSessionToken } from '../utils/Token.js'
 import AgencyInterface from '../schema/Agency/AgencyInterface.js'
 import type { UserSQL } from '../schema/User/UserSchema.js'
 import UserInterface from '../schema/User/UserInterface.js'
@@ -44,7 +44,7 @@ export async function resolver(
   ctx: any,
 ): Promise<CreateAgencyResponse> {
   const { sessionToken, name } = args.input
-  const session = await unpackSession(sessionToken, ctx)
+  const session = await unpackSessionToken(sessionToken, ctx)
 
   const user = await UserInterface.getUser(session.userId)
   if (!user) {
@@ -74,14 +74,14 @@ export async function resolver(
 
   await AuthTokenInterface.insert(agencyId, 'default', session.userId)
 
-  const defaultManagerInstructionClauses = [
-    'You are the manager of this agency.',
-    'You will be receiving messages from the client as well as other agents in the agency.',
-    "When you receive a message from the client, you should reply back to the client, and then decide how to meet the client's request by talking to the other agents while making sure to pass along all important information.",
-    'When the other agents report back to you, you should check that consensus has been reached among you all before sending a reply back to the client.',
-    //
-    'You will forward messages from the end user to the other agents in the agency.',
-    'You will forward messages from the other agents back to the end user.',
+  const defaultManagerInstructionClauses: Array<string> = [
+    'You are a helpful assistant.',
+    // 'You will be receiving messages from the client as well as other agents in the agency.',
+    // "When you receive a message from the client, you should reply back to the client, and then decide how to meet the client's request by talking to the other agents while making sure to pass along all important information.",
+    // 'When the other agents report back to you, you should check that consensus has been reached among you all before sending a reply back to the client.',
+    // //
+    // 'You will forward messages from the end user to the other agents in the agency.',
+    // 'You will forward messages from the other agents back to the end user.',
   ]
 
   const instructions: Array<InstructionSQL> =
@@ -97,7 +97,9 @@ export async function resolver(
       dateCreated: '',
     }))
 
-  instructions[0].canEdit = false
+  if (instructions[0]) {
+    instructions[0].canEdit = false
+  }
 
   const { agentId } = await CreateAgentResolver(
     null,

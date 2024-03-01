@@ -12,6 +12,7 @@ type OfflineCreateOrStartUserInput = {
 type OfflineCreateOrStartUserResponse = {
   success: boolean,
   passwordToken: string,
+  userCreated: boolean,
 }
 
 export const typeDefs: any = gql`
@@ -22,6 +23,7 @@ export const typeDefs: any = gql`
   type OfflineCreateOrStartUserResponse {
     success: Boolean!
     passwordToken: String!
+    userCreated: Boolean!
   }
 `
 
@@ -47,6 +49,7 @@ export async function resolver(
 
   const existing = await UserInterface.getByEmail(email)
 
+  let userCreated = false
   let userId
   if (existing) {
     userId = existing.userId
@@ -56,6 +59,7 @@ export async function resolver(
     await UserInterface.updateSettings(userId, {
       username: 'default',
     })
+    userCreated = true
   }
 
   const passwordToken = await createPasswordToken(userId, email)
@@ -63,5 +67,6 @@ export async function resolver(
   return {
     success: true,
     passwordToken,
+    userCreated,
   }
 }

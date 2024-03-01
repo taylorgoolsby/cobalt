@@ -9,13 +9,15 @@ type OfflineCreateOrStartUserInput = {}
 type OfflineCreateOrStartUserResponse = {
   success: boolean,
   passwordToken: string,
+  userCreated: boolean,
 }
 
-const OfflineCreateOrStartUser: any = gql`
+const OfflineCreateOrStartUserMutation: any = gql`
   mutation OfflineCreateOrStartUser($input: OfflineCreateOrStartUserInput!) {
     offlineCreateOrStartUser(input: $input) {
       success
       passwordToken
+      userCreated
     }
   }
 `
@@ -25,7 +27,7 @@ export default async (
 ): Promise<?OfflineCreateOrStartUserResponse> => {
   try {
     const res = await apolloClient.mutate({
-      mutation: OfflineCreateOrStartUser,
+      mutation: OfflineCreateOrStartUserMutation,
       variables: {
         input,
       },

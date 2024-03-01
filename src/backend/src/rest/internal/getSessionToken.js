@@ -7,6 +7,7 @@ import {
   unpackNewUserToken,
   unpackOauthToken,
   unpackPasswordToken,
+  unpackSessionToken,
 } from '../../utils/Token.js'
 import UserInterface from '../../schema/User/UserInterface.js'
 import type {
@@ -14,6 +15,7 @@ import type {
   NewUserToken,
   OauthToken,
   PasswordToken,
+  SessionToken,
 } from '../../utils/Token.js'
 import type { UserSQL } from '../../schema/User/UserSchema.js'
 import Email from '../Email.js'
@@ -142,9 +144,18 @@ export default async function getSessionToken(req: any, res: any) {
       return
     }
 
+    if (refreshToken) {
+      const [payload, primaryUser, exactUser] =
+        await unpackAndGetUser<SessionToken>(unpackSessionToken, refreshToken)
+
+      const sessionToken = await createSessionToken(primaryUser.userId)
+      res.send(sessionToken)
+      return
+    }
+
     throw new Error('Unsupported Auth Token')
   } catch (err) {
-    console.error(err.message)
+    console.error(err)
     res.status(400).send(err.message)
   }
 }
