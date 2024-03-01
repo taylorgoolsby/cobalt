@@ -95,7 +95,7 @@ export default class UserInterface {
         hashedPassword,
         isTemp,
         gptModels,
-        inferenceServerConfig
+        models
       ) VALUES (
         UNHEX(${userId}),
         UNHEX(${combinedUserId}),
@@ -103,7 +103,7 @@ export default class UserInterface {
         ${hashedPassword},
         ${!!options?.isTemp},
         ${JSON.stringify([])},
-        ${JSON.stringify({})}
+        ${JSON.stringify([])}
       );
     `
     await database.query(query)
@@ -153,7 +153,7 @@ export default class UserInterface {
         email,
         isEmailVerified,
         oauth,
-        inferenceServerConfig,
+        models,
         gptModels
       ) VALUES (
         UNHEX(${userId}),
@@ -162,7 +162,7 @@ export default class UserInterface {
         TRUE,
         ${JSON.stringify(oauth)},
         ${JSON.stringify([])},
-        ${JSON.stringify({})}
+        ${JSON.stringify([])}
       ) ON DUPLICATE KEY UPDATE -- generated unique column oauthId should collide
       oauth = VALUES(oauth),
       dateUpdated = CURRENT_TIMESTAMP;
@@ -216,7 +216,7 @@ export default class UserInterface {
         email,
         isEmailVerified,
         oauth,
-        inferenceServerConfig,
+        models,
         gptModels
       ) VALUES (
         UNHEX(${userId}),
@@ -225,7 +225,7 @@ export default class UserInterface {
         TRUE,
         ${JSON.stringify(oauth)},
         ${JSON.stringify([])},
-        ${JSON.stringify({})}
+        ${JSON.stringify([])}
       ) ON DUPLICATE KEY UPDATE -- generated unique column oauthId should collide
       oauth = VALUES(oauth),
       dateUpdated = CURRENT_TIMESTAMP;
@@ -295,7 +295,7 @@ export default class UserInterface {
       isMfaEnabled = ${nextUser.isMfaEnabled},
       hashedPassword = ${nextUser.hashedPassword},
       openAiKey = ${Security.encrypt(nextUser.openAiKey)},
-      inferenceServerConfig = ${JSON.stringify(nextUser.inferenceServerConfig)},
+      models = ${JSON.stringify(nextUser.models)},
       dateUpdated = CURRENT_TIMESTAMP
       WHERE userId = UNHEX(${userId});
     `

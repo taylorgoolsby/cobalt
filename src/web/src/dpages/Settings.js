@@ -102,6 +102,7 @@ const MFA_METHOD = {
 type MfaMethod = $Keys<typeof MFA_METHOD>
 
 type State = {
+  loaded: boolean,
   username: string,
   openAiKey: string,
   maskedOpenAiKey: string,
@@ -118,8 +119,14 @@ type State = {
   hasPassword: boolean,
   hasOpenAiKey: boolean,
   password: ?string,
-  apiBase: ?string,
-  apiKey: ?string,
+  models: Array<{
+    // This tries to conform to the naming scheme used by continue.dev config: https://continue.dev/docs/reference/Model%20Providers/openai
+    title: string,
+    apiBase: string,
+    apiKey?: ?string,
+    completionOptions?: ?{ ... },
+  }>,
+  modelsString: string,
   showChangeOpenAiKeyWizardModal: boolean,
   showPasswordWizardModal: boolean,
   showAddEmailWizardModal: boolean,
@@ -134,6 +141,7 @@ class Settings extends Component<any, State> {
     super(props)
 
     this.state = {
+      loaded: false,
       username: '',
       openAiKey: '',
       maskedOpenAiKey: '',
@@ -150,8 +158,8 @@ class Settings extends Component<any, State> {
       hasPassword: false,
       hasOpenAiKey: false,
       password: null,
-      apiBase: '',
-      apiKey: '',
+      models: [],
+      modelsString: '[]',
       showChangeOpenAiKeyWizardModal: false,
       showPasswordWizardModal: false,
       showAddEmailWizardModal: false,
@@ -184,6 +192,7 @@ class Settings extends Component<any, State> {
   loadUser: any = (currentUser: User) => {
     this.serverData = currentUser
     this.setState({
+      loaded: true,
       username: currentUser.username ?? '',
       openAiKey: '',
       maskedOpenAiKey: currentUser.maskedOpenAiKey ?? '',
@@ -200,8 +209,8 @@ class Settings extends Component<any, State> {
       hasPassword: !!currentUser.hasPassword,
       hasOpenAiKey: !!currentUser.hasOpenAiKey,
       password: null,
-      apiBase: currentUser.inferenceServerConfig?.apiBase ?? '',
-      apiKey: currentUser.inferenceServerConfig?.apiKey ?? '',
+      models: currentUser.models ?? [],
+      modelsString: JSON.stringify(currentUser.models ?? [], null, '  '),
     })
   }
 
@@ -217,8 +226,8 @@ class Settings extends Component<any, State> {
       this.serverData?.hasPassword !== this.state.hasPassword ||
       this.state.password || // This has a value when password wizard exits
       this.state.openAiKey ||
-      this.serverData?.inferenceServerConfig?.apiBase !== this.state.apiBase ||
-      this.serverData?.inferenceServerConfig?.apiKey !== this.state.apiKey
+      JSON.stringify(this.serverData?.models) !==
+        JSON.stringify(this.state.models)
     ) {
       return true
     }
@@ -345,6 +354,20 @@ class Settings extends Component<any, State> {
     })
   }
 
+  handleModelsStringChange: any = (e: any) => {
+    this.setState({
+      modelsString: e.target.value,
+    })
+    try {
+      const parsedModels = JSON.parse(e.target.value)
+      this.setState({
+        models: parsedModels,
+      })
+    } catch (err) {
+      console.error('Error parsing models string', err)
+    }
+  }
+
   setShowAddPhoneWizardModal: any = (value: boolean) => {
     this.setState({
       showAddPhoneWizardModal: value,
@@ -366,8 +389,7 @@ class Settings extends Component<any, State> {
     const input: UpdateSettingsInput = {
       sessionToken: nonMaybe(sessionStore.sessionToken),
       username: this.state.username,
-      apiBase: this.state.apiBase,
-      apiKey: this.state.apiKey,
+      models: JSON.stringify(this.state.models),
     }
 
     const changingOpenAiKey =
@@ -591,9 +613,9 @@ class Settings extends Component<any, State> {
 
   render(): any {
     const {
+      loaded,
       username,
-      apiBase,
-      apiKey,
+      modelsString,
       openAiKey,
       maskedOpenAiKey,
       email,
@@ -766,22 +788,17 @@ class Settings extends Component<any, State> {
           {/*</FormSection>*/}
           <LineBreak />
           <LineBreak />
-          <TextField
-            className={'text-field name-field'}
-            label={'API Base URL'}
-            value={apiBase}
-            onInput={this.handleApiBaseChange}
-            onEnterPress={this.submitChanges}
-            autoFocus
-          />
-          <TextField
-            className={'text-field name-field'}
-            label={'API Key (Optional)'}
-            value={apiKey}
-            onInput={this.handleApiKeyChange}
-            onEnterPress={this.submitChanges}
-            autoFocus
-          />
+          {loaded ? (
+            <TextField
+              className={'text-field name-field'}
+              label={'Models Config'}
+              value={modelsString}
+              onInput={this.handleModelsStringChange}
+              onEnterPress={this.submitChanges}
+              multiline
+              autoFocus
+            />
+          ) : null}
           <LineBreak />
           <LineBreak />
           <ButtonSquared

@@ -19,17 +19,9 @@ async function newMessageHandler(user: UserSQL, data: NewMessageInput) {
   // if (!openAiKey) {
   //   throw new Error('Unauthorized')
   // }
-  const apiBase = user?.inferenceServerConfig?.apiBase
-  if (!apiBase) {
-    throw new Error('Unauthorized')
-  }
-  const apiKey = user?.inferenceServerConfig?.apiKey
-  const isOpenAi =
-    user?.inferenceServerConfig?.apiBase === 'https://api.openai.com'
-  if (isOpenAi) {
-    if (!apiKey) {
-      throw new Error('Unauthorized')
-    }
+  const model = user.models.find((model) => model.title === data.modelTitle)
+  if (!model) {
+    throw new Error('That model does not exist in your account.')
   }
 
   if (!data.agencyId) {
@@ -129,6 +121,7 @@ async function newMessageHandler(user: UserSQL, data: NewMessageInput) {
   // Start the next chat iteration with the AgentMind, and stream token updates to client:
   AgentMind.chatIteration(
     user,
+    model,
     data.agencyId,
     managerAgentConversation.agentId,
     data.chatId,
@@ -136,6 +129,7 @@ async function newMessageHandler(user: UserSQL, data: NewMessageInput) {
     data.userPrompt, // This was already inserted into Message table.
     callbacks.appendMessage,
     callbacks.updateMessage,
+    callbacks.error,
   )
 }
 

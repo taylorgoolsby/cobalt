@@ -35,6 +35,10 @@ const styles = {
       border-radius: 4px;
     }
 
+    textarea {
+      height: unset;
+    }
+
     &[data-has-label='false'] {
       input,
       textarea {

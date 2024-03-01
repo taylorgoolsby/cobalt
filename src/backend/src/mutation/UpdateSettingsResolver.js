@@ -15,8 +15,6 @@ import Email from '../rest/Email.js'
 
 type UpdateSettingsInput = {
   sessionToken: string,
-  apiBase?: ?string,
-  apiKey?: ?string,
   username?: ?string,
   openAiKey?: ?string,
   useTrialKey?: ?boolean,
@@ -26,6 +24,7 @@ type UpdateSettingsInput = {
   isMfaEnabled?: boolean,
   mfaToken?: ?string,
   password?: ?string,
+  models?: ?string,
 }
 
 type UpdateSettingsResponse = {
@@ -36,8 +35,6 @@ type UpdateSettingsResponse = {
 export const typeDefs: any = gql`
   input UpdateSettingsInput {
     sessionToken: String!
-    apiBase: String
-    apiKey: String
     username: String
     openAiKey: String
     useTrialKey: Boolean
@@ -47,6 +44,7 @@ export const typeDefs: any = gql`
     isMfaEnabled: Boolean
     mfaToken: String
     password: String
+    models: String
   }
 
   type UpdateSettingsResponse {
@@ -63,7 +61,7 @@ export async function resolver(
   try {
     const {
       sessionToken,
-      apiKey,
+      models,
       // username,
       // openAiKey,
       // useTrialKey,
@@ -74,7 +72,6 @@ export async function resolver(
       // mfaToken,
       // password,
     } = args.input
-    let apiBase = args.input.apiBase
     const session = await unpackSessionToken(sessionToken, ctx)
 
     const existingUser = await UserInterface.getUser(session.userId)
@@ -172,22 +169,81 @@ export async function resolver(
     //   hashedPassword,
     // })
 
-    if (!!apiBase) {
-      // Ensure URL starts with http:// or https://
-      if (!apiBase.match(/^https?:\/\//)) {
-        throw new Error('API base must start with http:// or https://')
+    if (!!models) {
+      // Ensure models is parseable JSON array
+      let parsedModels
+      try {
+        parsedModels = JSON.parse(models)
+      } catch (err) {
+        throw new Error('Models must be a valid JSON array')
+      }
+      if (!Array.isArray(parsedModels)) {
+        throw new Error('Models must be a valid JSON array')
       }
 
-      // Remove trailing slash if there is one:
-      apiBase = apiBase.replace(/\/$/, '')
-    }
+      for (const m of parsedModels) {
+        if (!(typeof m === 'object' && !Array.isArray(m))) {
+          throw new Error('Each model must be a valid JSON object')
+        }
+        if (!m.title) {
+          throw new Error('Each model must have a title')
+        }
+        if (!m.apiBase) {
+          throw new Error('Each model must have an apiBase')
+        }
+        if (m.completionOptions) {
+          if (
+            !(
+              typeof m.completionOptions === 'object' &&
+              !Array.isArray(m.completionOptions)
+            )
+          ) {
+            throw new Error('completionOptions must be a valid JSON object')
+          }
+          // Check that each field under completionOptions is a string or number:
+          for (const [key, value] of Object.entries(m.completionOptions)) {
+            if (!(typeof value === 'string' || typeof value === 'number')) {
+              throw new Error(
+                'Each field under completionOptions must be a string or number',
+              )
+            }
+          }
+        }
+        // Ensure there are no two models with the same title:
+        const titleCount = parsedModels.filter(
+          (model) => model.title === m.title,
+        ).length
+        if (titleCount > 1) {
+          throw new Error('Each model must have a unique title')
+        }
 
-    await UserInterface.updateSettings(session.userId, {
-      inferenceServerConfig: {
-        apiBase,
-        apiKey,
-      },
-    })
+        // Ensure each model's URL starts with http:// or https://
+        if (!m.apiBase.match(/^https?:\/\//)) {
+          throw new Error('API base must start with http:// or https://')
+        }
+
+        // Remove trailing slash if there is one:
+        m.apiBase = m.apiBase.replace(/\/$/, '')
+
+        // If the apiBase is the OpenAI API, ensure an apiKey is also defined:
+        if (m.apiBase === 'https://api.openai.com') {
+          if (!m.apiKey) {
+            throw new Error('An apiKey must be defined for the OpenAI API')
+          }
+
+          // Also test if the key is good:
+          try {
+            await InferenceRest.getAvailableModels(m.apiKey)
+          } catch (err) {
+            throw new Error('The provided OpenAI API key is invalid')
+          }
+        }
+      }
+
+      await UserInterface.updateSettings(session.userId, {
+        models: parsedModels,
+      })
+    }
 
     const updatedUser = await UserInterface.getUser(session.userId)
 

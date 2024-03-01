@@ -47,7 +47,7 @@ import AgentInterface from '../schema/Agent/AgentInterface.js'
 import AgentConversationInterface from '../schema/AgentConversation/AgentConversationInterface.js'
 import { getCallbacks } from '../websocket/callbacks.js'
 import { dequeue, enqueue } from './mindQueue.js'
-import type { UserSQL } from '../schema/User/UserSchema.js'
+import type { ModelConfig, UserSQL } from '../schema/User/UserSchema.js'
 import { encodeChat } from 'gpt-tokenizer'
 import ShortTermSummarization from './ShortTermSummarization.js'
 
@@ -55,6 +55,7 @@ export default class AgentMind {
   static chatIteration(
     // These inputs should be verified for ownership already:
     user: UserSQL,
+    model: ModelConfig,
     agencyId: number,
     currentAgentVersionId: number,
     agencyConversationId: string,
@@ -63,6 +64,7 @@ export default class AgentMind {
     userPrompt: string,
     onMessageFromAgent: (output: AppendMessageOutput) => any,
     onUpdateMessage: (output: UpdateMessageOutput) => any,
+    onError: (error: Error) => any,
   ): void {
     const userId = user.userId
 
@@ -101,6 +103,7 @@ export default class AgentMind {
 
         const shortTermSummary = await ShortTermSummarization.performCompletion(
           user,
+          model,
           truncatedMessages,
         )
 
@@ -126,6 +129,7 @@ export default class AgentMind {
 
         const envokeMind: ?EnvokeMind = await generateResponse(
           user,
+          model,
           agencyId,
           currentAgent,
           managerAgent,
@@ -252,7 +256,7 @@ export default class AgentMind {
           callbacks.stoppedIterating()
         }
       } catch (err) {
-        console.error(err)
+        onError(err)
       }
     })
   }
@@ -267,6 +271,7 @@ class RetryError extends Error {
 
 function generateResponse(
   user: UserSQL,
+  model: ModelConfig,
   agencyId: number,
   agent: AgentSQL,
   managerAgent: AgentSQL,
@@ -333,6 +338,7 @@ function generateResponse(
       // Send a /chat/completions call
       InferenceRest.relayChatCompletionStream(
         user,
+        model,
         context,
         (res: ChatCompletionsResponse) => {
           if (stop) {
@@ -418,8 +424,12 @@ function generateResponse(
           }
           onUpdateMessage(output)
         },
-        () => {
-          reject(new Error('Unable to get response from GPT.'))
+        (error?: ?Error) => {
+          if (error) {
+            reject(error)
+          } else {
+            reject(new Error('Unable to get response from GPT.'))
+          }
         },
       )
     } catch (err) {

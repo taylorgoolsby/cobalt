@@ -13,6 +13,7 @@ let sessionToken: any
 export type NewChatInput = {
   agencyId: number,
   userPrompt: string,
+  modelTitle: string,
   filterOnlyManager?: ?boolean,
 }
 
@@ -26,6 +27,7 @@ export type NewMessageInput = {
   agencyId: number,
   chatId: string,
   userPrompt: string,
+  modelTitle: string,
 }
 
 export type LoadChatInput = {
@@ -235,6 +237,11 @@ export function establishSocket(inputSessionToken: ?string): void {
       if (debouncedOnUpdateMessage) {
         debouncedOnUpdateMessage(output)
       }
+    })
+
+    socket.on('error', (error: { message: string }) => {
+      console.error('Websocket Error:', error.message)
+      showErrorModal(error.message)
     })
   })
 }

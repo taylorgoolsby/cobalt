@@ -16,7 +16,7 @@ const GetCurrentUser: any = gql`
         phoneNumber
         isPhoneVerified
         isMfaEnabled
-        inferenceServerConfig
+        models
         gptModels
         dateUpdated
         dateCreated

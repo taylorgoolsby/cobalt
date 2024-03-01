@@ -11,6 +11,7 @@ const className = css`
   max-width: 700px;
   word-wrap: break-word;
 `
+const loadTime = Date.now()
 
 type ErrorModalProps = {}
 
@@ -19,6 +20,8 @@ const ErrorModal: any = observer((props: ErrorModalProps) => {
 
   const message = mainStore.errorModalMessage
   const open = mainStore.showErrorModal
+
+  console.log('mainStore.showErrorModal', mainStore.showErrorModal)
 
   function onClose() {
     mainStore.setShowErrorModal(false)
@@ -38,8 +41,10 @@ const ErrorModal: any = observer((props: ErrorModalProps) => {
 })
 
 export function showErrorModal(message: string): void {
-  mainStore.setErrorModalMessage(message)
-  mainStore.setShowErrorModal(true)
+  setTimeout(() => {
+    mainStore.setErrorModalMessage(message)
+    mainStore.setShowErrorModal(true)
+  }, Math.max(1000 - (Date.now() - loadTime), 0))
 }
 
 export default ErrorModal

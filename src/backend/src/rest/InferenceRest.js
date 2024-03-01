@@ -3,7 +3,7 @@
 import axios from 'axios'
 import parseAxiosError from '../utils/parseAxiosError.js'
 import Config from 'common/src/Config.js'
-import type { UserSQL } from '../schema/User/UserSchema.js'
+import type { ModelConfig, UserSQL } from '../schema/User/UserSchema.js'
 
 export type GPTMessage = {
   role: string,
@@ -125,12 +125,13 @@ export default class InferenceRest {
 
   static relayChatCompletionStream(
     user: UserSQL,
+    model: ModelConfig,
     messages: Array<GPTMessage>,
     onData: (data: ChatCompletionsResponse) => any,
-    onError?: () => any,
+    onError?: (err?: ?Error) => any,
   ): void {
-    const apiBase = user.inferenceServerConfig?.apiBase
-    const apiKey = user.inferenceServerConfig?.apiKey
+    const apiBase = model.apiBase
+    const apiKey = model.apiKey
 
     if (!apiBase) {
       throw new Error('apiBase is required')
@@ -161,7 +162,7 @@ export default class InferenceRest {
 
     // todo: As long as completionOptions is configured by the end user,
     //  it should be safe to pass them through without checking what they are.
-    const data: any = user.inferenceServerConfig?.completionOptions ?? {}
+    const data: any = model.completionOptions ?? {}
     data.messages = messages
     data.stream = true
 
@@ -230,8 +231,16 @@ export default class InferenceRest {
               // The connection might also close before the rest of the JSON comes in.
               // So we print the error here, but it is useless outside of this function,
               // so onError is called with no args.
-              console.error(chunk.toString())
-              if (onError) onError()
+              const errorChunk = chunk.toString()
+              try {
+                const parsed = JSON.parse(errorChunk)
+                if (onError && parsed?.error?.message)
+                  onError(new Error(parsed?.error?.message))
+                else if (onError) onError()
+              } catch (err) {
+                console.error(errorChunk)
+                if (onError) onError()
+              }
             })
             // data.on('end', () => {
             // console.log('closed third party')
@@ -245,10 +254,11 @@ export default class InferenceRest {
 
   static async chatCompletion(
     user: UserSQL,
+    model: ModelConfig,
     messages: Array<GPTMessage>,
   ): Promise<ChatCompletionsResponse> {
-    const apiBase = user.inferenceServerConfig?.apiBase
-    const apiKey = user.inferenceServerConfig?.apiKey
+    const apiBase = model.apiBase
+    const apiKey = model.apiKey
 
     if (!apiBase) {
       throw new Error('apiBase is required')
@@ -266,7 +276,7 @@ export default class InferenceRest {
 
     // todo: As long as completionOptions is configured by the end user,
     //  it should be safe to pass them through without checking what they are.
-    const data: any = user.inferenceServerConfig?.completionOptions ?? {}
+    const data: any = model.completionOptions ?? {}
     data.messages = messages
     data.stream = false
 
@@ -278,7 +288,11 @@ export default class InferenceRest {
     )
 
     if (res.error) {
-      throw new Error(res.error)
+      if (res.error instanceof Error) {
+        throw res.error
+      } else {
+        throw new Error(res.error)
+      }
     }
 
     return res
@@ -352,6 +366,9 @@ async function send(
     3,
   ).catch((err) => {
     console.error(err)
+    return {
+      error: err,
+    }
   })
   return res
 }

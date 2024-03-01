@@ -14,6 +14,7 @@ import { MessageRole, MessageType } from '../schema/Message/MessageSchema.js'
 export type NewChatInput = {
   agencyId: number,
   userPrompt: string,
+  modelTitle: string,
   filterOnlyManager?: ?boolean,
 }
 
@@ -21,6 +22,7 @@ export type NewMessageInput = {
   agencyId: number,
   chatId: string,
   userPrompt: string,
+  modelTitle: string,
 }
 
 export type LoadChatInput = {
@@ -82,6 +84,7 @@ export type Callbacks = {
   updateName: (output: UpdateNameOutput) => any,
   appendMessage: (output: AppendMessageOutput) => any,
   updateMessage: (output: UpdateMessageOutput) => any,
+  error: (err: Error) => any,
   stoppedIterating: () => any,
 }
 
@@ -483,6 +486,31 @@ export async function getCallbacks(
               })}\n\n`,
             )
           }
+        }
+      }
+    },
+    error: (err: Error) => {
+      console.error(err)
+
+      const sockets: Array<any> = Object.values(socketRegistry[userId] || {})
+      for (const socket of sockets) {
+        // todo: potentially big array if many users are sharing a public access key.
+        if (socket?.connected) {
+          socket.emit('error', { message: err.message })
+        }
+      }
+
+      const connections: Array<any> = Object.values(
+        SSEConnectionRegistry[agencyConversationId] || {},
+      )
+      for (const res of connections) {
+        if (res && !res.writableEnded) {
+          res.write(
+            `data: ${JSON.stringify({
+              type: 'error',
+              output: { message: err.message },
+            })}\n\n`,
+          )
         }
       }
     },

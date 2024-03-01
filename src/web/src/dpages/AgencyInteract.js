@@ -4,7 +4,7 @@ import type { AbstractComponent } from 'react'
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import View from '../components/View.js'
 import { css } from 'goober'
-import type { User } from '../types/User.js'
+import type { Model, User } from '../types/User.js'
 import type { Agency } from '../types/Agency.js'
 import Colors from '../Colors.js'
 import { useQuery } from '@apollo/client'
@@ -23,6 +23,7 @@ import {
   PiArrowUpBold,
   PiCaretLeftBold,
   PiCaretRightBold,
+  PiGear,
   PiPencilSimple,
 } from 'react-icons/pi'
 import Text from '../components/Text.js'
@@ -41,7 +42,6 @@ import { observer } from 'mobx-react-lite'
 import classnames from 'classnames'
 import mainStore from '../stores/MainStore.js'
 import reportEvent from '../utils/reportEvent.js'
-import { toJS } from 'mobx'
 import useHistory from '../utils/useHistory.js'
 
 const agentPanelDefaultWidth = 300
@@ -402,12 +402,14 @@ type ChatInputProps = {
   inputRef: any,
   value: string,
   isSubmitting: boolean,
+  selectedModel: ?Model,
   onInput: (event: any) => any,
   onSubmit: (message: string) => any,
 }
 
 const ChatInput = (props: ChatInputProps): any => {
-  const { inputRef, value, isSubmitting, onInput, onSubmit } = props
+  const { inputRef, value, isSubmitting, selectedModel, onInput, onSubmit } =
+    props
 
   function handleSubmit(event: any) {
     if (event.shiftKey) {
@@ -415,6 +417,9 @@ const ChatInput = (props: ChatInputProps): any => {
     }
     event.preventDefault()
     event.stopPropagation()
+    if (selectedModel === null) {
+      return
+    }
     onSubmit(value)
     reportEvent('send message', {})
   }
@@ -430,13 +435,13 @@ const ChatInput = (props: ChatInputProps): any => {
             value={value}
             onInput={onInput}
             onEnterPress={handleSubmit}
-            // disabled={isSubmitting}
+            // disabled={selectedModel === null}
             autoFocus
           />
           <Button
             className={'submit-button'}
             data-is-submitting={isSubmitting}
-            disabled={!value || isSubmitting}
+            disabled={!value || isSubmitting || selectedModel === null}
             onClick={onSubmit}
           >
             <View>
@@ -460,6 +465,9 @@ type ChatProps = {
   onSelectConversation: (agencyConversation: ?AgencyConversation) => any,
   agencyConversations: Array<AgencyConversation>,
   isLoading: boolean,
+
+  selectedModel: ?Model,
+  onSelectModel: (model: Model) => any,
 }
 
 const Chat = observer((props: ChatProps): any => {
@@ -474,6 +482,8 @@ const Chat = observer((props: ChatProps): any => {
     onSelectConversation,
     agencyConversations,
     isLoading,
+    selectedModel,
+    onSelectModel,
   } = props
 
   const orderedMessageIds =
@@ -562,6 +572,13 @@ const Chat = observer((props: ChatProps): any => {
     }
   }
 
+  function handleModelSelected(model: Model) {
+    onSelectModel(model)
+    if (inputRef.current) {
+      inputRef.current.focus()
+    }
+  }
+
   const agencyVersionId =
     selectedConversation?.agencyId ?? agency?.agencyId ?? 0
 
@@ -594,6 +611,7 @@ const Chat = observer((props: ChatProps): any => {
         inputRef={inputRef}
         value={inputValue}
         isSubmitting={hasWriting}
+        selectedModel={selectedModel}
         onInput={handleInput}
         onSubmit={handleSubmit}
       />
@@ -611,6 +629,11 @@ const Chat = observer((props: ChatProps): any => {
       {/*    <Text>{`ID: ${agencyVersionId}`}</Text>*/}
       {/*  </Button>*/}
       {/*</View>*/}
+      <ModelSwitcher
+        currentUser={currentUser}
+        selectedModel={selectedModel}
+        onSelectModel={onSelectModel}
+      />
       <Button
         className={'button settings-button'}
         onClick={() => {
@@ -937,6 +960,85 @@ const ConversationsListPane: AbstractComponent<
   )
 })
 
+type ModelSwitcherProps = {
+  currentUser: User,
+  selectedModel: ?Model,
+  onSelectModel: (model: Model) => any,
+}
+
+const ModelSwitcher = (props: ModelSwitcherProps) => {
+  const { currentUser, selectedModel, onSelectModel } = props
+
+  const models = currentUser.models ?? []
+
+  const [showMenu, setShowMenu] = useState(false)
+
+  function handleToggleMenu() {
+    setShowMenu(!showMenu)
+  }
+
+  function selectModel(model: any) {
+    onSelectModel(model)
+    setShowMenu(false)
+  }
+
+  const [history] = useHistory()
+  function handleOpenSettings() {
+    history?.push('/app/settings')
+  }
+
+  return (
+    <View className={styles.conversations}>
+      <Button
+        className={'button'}
+        onClick={selectedModel ? handleToggleMenu : handleOpenSettings}
+      >
+        <Text>{selectedModel ? selectedModel.title : 'Configure Models'}</Text>
+      </Button>
+      <View className={'pane'} data-is-open={showMenu}>
+        {models.map((m, i) => {
+          return (
+            <React.Fragment key={m.title}>
+              <Button
+                onClick={() => selectModel(m)}
+                data-selected={selectedModel?.title === m.title}
+              >
+                <Text>{m.title}</Text>
+              </Button>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignSelf: 'stretch',
+                  alignItems: 'center',
+                  marginBottom: 10,
+                  marginRight: 10,
+                }}
+              >
+                <View
+                  style={{
+                    flex: 1,
+                    height: 1,
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    margin: '0 10px',
+                  }}
+                />
+              </View>
+            </React.Fragment>
+          )
+        })}
+        <Button onClick={handleOpenSettings}>
+          <Text>{'Configure Models'}</Text>
+          <PiGear
+            style={{
+              fontSize: 18,
+            }}
+          />
+        </Button>
+      </View>
+    </View>
+  )
+}
+
 type AgencyInteractProps = {
   className: string,
   currentUser: User,
@@ -959,6 +1061,13 @@ const AgencyInteract: (AgencyInteractProps) => any = observer(
       (agencyConversation) =>
         agencyConversation.agencyConversationId === chatStore.chatId,
     )
+
+    const [selectedModel, setSelectedModel] = useState<?Model>(
+      currentUser.models?.[0],
+    )
+    function handleSelectModel(model: Model) {
+      setSelectedModel(model)
+    }
 
     const [selectedConversationId, setSelectedConversationId] =
       useState<?string>(null)
@@ -1007,6 +1116,7 @@ const AgencyInteract: (AgencyInteractProps) => any = observer(
           {
             agencyId: agency.agencyId || 0,
             userPrompt: message,
+            modelTitle: selectedModel?.title ?? '',
           },
           onFirstMessageComplete,
           handleNameUpdated,
@@ -1019,6 +1129,7 @@ const AgencyInteract: (AgencyInteractProps) => any = observer(
           agencyId: agency.agencyId || 0,
           chatId: chatStore.chatId,
           userPrompt: message,
+          modelTitle: selectedModel?.title ?? '',
         })
         if (!sentSuccessfully) {
           chatStore.setIsUserWaiting(false)
@@ -1059,6 +1170,8 @@ const AgencyInteract: (AgencyInteractProps) => any = observer(
           onSelectConversation={handleSelectConversation}
           agencyConversations={agencyConversations}
           isLoading={isLoading}
+          selectedModel={selectedModel}
+          onSelectModel={handleSelectModel}
         />
         {/*<AgentsPane*/}
         {/*  currentUser={currentUser}*/}

@@ -146,6 +146,8 @@ const Input: AbstractComponent<InputProps, any> = forwardRef(
       if (onInput) onInput(e)
     }
 
+    const rows = value?.split('\n').length || 1
+
     if (multiline) {
       return (
         <textarea
@@ -171,7 +173,8 @@ const Input: AbstractComponent<InputProps, any> = forwardRef(
           maxLength={maxLength}
           value={value}
           // rows={!value ? 1 : null}
-          rows={1}
+          // rows={1}
+          rows={rows}
           onFocus={onFocus}
           onBlur={onBlur}
           autoFocus={autoFocus}

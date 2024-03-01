@@ -12,6 +12,8 @@ import { showToastModal } from '../modals/ToastModal.js'
 import nonMaybe from 'non-maybe'
 import { establishSocket } from '../websocket/socketHandler.js'
 import { disconnect } from '../websocket/socketHandler.js'
+import apolloClient from '../apolloClient.js'
+import GetCurrentUser from '../graphql/GetCurrentUser.js'
 
 /*
 The SessionStore handles loading the session from localStorage or sessionStorage
@@ -213,13 +215,38 @@ class SessionStore {
       browserStore.set('sessionToken', sessionToken)
       console.warn('new sessionToken set', decoded)
       if (sessionToken) {
-        console.log('websocket sessionToken', sessionToken)
-        disconnect()
-        establishSocket(sessionToken)
+        this.connectSocket()
       }
     } catch (err) {
       console.error(err)
     }
+  }
+
+  connectSocket() {
+    Promise.resolve().then(async () => {
+      try {
+        if (this.sessionToken) {
+          const res = await apolloClient.query({
+            query: GetCurrentUser,
+            variables: {
+              sessionToken: this.sessionToken,
+            },
+            fetchPolicy: 'network-only',
+          })
+          const currentUser = res.data?.viewer?.currentUser
+          const isOnboarded = !!currentUser?.isOnboarded
+
+          console.log('isOnboarded', isOnboarded)
+
+          if (isOnboarded) {
+            disconnect()
+            establishSocket(this.sessionToken)
+          }
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    })
   }
 
   logout() {

@@ -19,17 +19,10 @@ const newChatHandler = async (
   // if (!openAiKey) {
   //   throw new Error('Unauthorized')
   // }
-  const apiBase = user?.inferenceServerConfig?.apiBase
-  if (!apiBase) {
-    throw new Error('Unauthorized')
-  }
-  const apiKey = user?.inferenceServerConfig?.apiKey
-  const isOpenAi =
-    user?.inferenceServerConfig?.apiBase === 'https://api.openai.com'
-  if (isOpenAi) {
-    if (!apiKey) {
-      throw new Error('Unauthorized')
-    }
+  // Ensure that user.models has a model defined which matches the data.modelTitle:
+  const model = user.models.find((model) => model.title === data.modelTitle)
+  if (!model) {
+    throw new Error('That model does not exist in your account.')
   }
 
   if (!data.agencyId) {
@@ -74,17 +67,18 @@ const newChatHandler = async (
   Promise.resolve().then(async () => {
     try {
       const updateNameOutput = await generateName(
+        user,
+        model,
         newChatOutput.agencyId,
         newChatOutput.chatId,
         managerAgentId,
-        user,
         'New Chat',
         data.userPrompt,
       )
       // console.debug('updateName', updateNameOutput)
       callbacks.updateName(updateNameOutput)
     } catch (err) {
-      console.error(err)
+      callbacks.error(err)
     }
   })
 
@@ -93,6 +87,7 @@ const newChatHandler = async (
   // so this starts off long running asynchronous process:
   AgentMind.chatIteration(
     user,
+    model,
     data.agencyId,
     managerVersionId,
     newChatOutput.chatId,
@@ -103,6 +98,7 @@ const newChatHandler = async (
     data.userPrompt,
     callbacks.appendMessage,
     callbacks.updateMessage,
+    callbacks.error,
   )
 
   return newChatOutput.chatId

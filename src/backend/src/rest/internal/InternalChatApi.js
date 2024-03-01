@@ -13,7 +13,7 @@ import MessageInterface from '../../schema/Message/MessageInterface.js'
 import InferenceRest from '../InferenceRest.js'
 import InstructionInterface from '../../schema/Instruction/InstructionInterface.js'
 import { MessageRole, MessageType } from '../../schema/Message/MessageSchema.js'
-import type { UserSQL } from '../../schema/User/UserSchema.js'
+import type { ModelConfig, UserSQL } from '../../schema/User/UserSchema.js'
 import type {
   NewChatInput,
   NewChatOutput,
@@ -278,15 +278,16 @@ export async function createNewChat(
 }
 
 export async function generateName(
+  user: UserSQL,
+  model: ModelConfig,
   agencyId: number,
   agencyConversationId: string,
   managerAgentId: number,
-  user: UserSQL,
   originalName: string,
   userPrompt: string,
 ): Promise<UpdateNameOutput> {
   console.debug('generating a name')
-  const nameRes = await InferenceRest.chatCompletion(user, [
+  const nameRes = await InferenceRest.chatCompletion(user, model, [
     {
       role: 'system',
       content:

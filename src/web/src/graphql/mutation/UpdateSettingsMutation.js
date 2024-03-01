@@ -8,8 +8,6 @@ import reportEvent from '../../utils/reportEvent.js'
 
 export type UpdateSettingsInput = {
   sessionToken: string,
-  apiBase?: ?string,
-  apiKey?: ?string,
   username?: ?string,
   openAiKey?: ?string,
   useTrialKey?: ?boolean,
@@ -19,6 +17,7 @@ export type UpdateSettingsInput = {
   isMfaEnabled?: boolean,
   mfaToken?: ?string,
   password?: ?string,
+  models?: ?string,
 }
 
 type UpdateSettingsResponse = {
@@ -41,6 +40,7 @@ const UpdateSettingsMutation: any = gql`
           isPhoneVerified
           isMfaEnabled
           gptModels
+          models
           dateUpdated
           dateCreated
 
@@ -62,7 +62,7 @@ const UpdateSettingsMutation: any = gql`
         phoneNumber
         isPhoneVerified
         isMfaEnabled
-        inferenceServerConfig
+        models
         dateUpdated
         dateCreated
 

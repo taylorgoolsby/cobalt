@@ -3,6 +3,14 @@
 import type { Agency } from './Agency.js'
 import type { AuthToken } from './AuthToken.js'
 
+export type Model = {
+  // This tries to conform to the naming scheme used by continue.dev config: https://continue.dev/docs/reference/Model%20Providers/openai
+  title: string,
+  apiBase: string,
+  apiKey?: ?string,
+  completionOptions?: ?{ ... },
+}
+
 export type User = {
   userId?: string,
   username?: string,
@@ -12,12 +20,7 @@ export type User = {
   phoneNumber?: ?string,
   isPhoneVerified?: boolean,
   isMfaEnabled?: boolean,
-  inferenceServerConfig: {
-    // This tries to conform to the naming scheme used by continue.dev config: https://continue.dev/docs/reference/Model%20Providers/openai
-    apiBase?: ?string,
-    apiKey?: ?string,
-    completionOptions?: ?{ ... },
-  },
+  models?: Array<Model>,
   gptModels?: Array<string>,
   dateUpdated?: number,
   dateCreated?: number,

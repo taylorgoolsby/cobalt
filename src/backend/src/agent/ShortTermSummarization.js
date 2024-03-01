@@ -5,12 +5,13 @@ import type {
   GPTMessage,
 } from '../rest/InferenceRest.js'
 import InferenceRest from '../rest/InferenceRest.js'
-import type { UserSQL } from '../schema/User/UserSchema.js'
+import type { ModelConfig, UserSQL } from '../schema/User/UserSchema.js'
 import type { MessageSQL } from '../schema/Message/MessageSchema.js'
 
 export default class ShortTermSummarization {
   static async performCompletion(
     user: UserSQL,
+    model: ModelConfig,
     messages: Array<MessageSQL>,
   ): Promise<string> {
     if (!messages.length) return ''
@@ -68,7 +69,7 @@ We are greeting each other. You said "hi" and I said "Hello! How can I help you 
 
     console.log('short term summarization context', context)
 
-    const response = await InferenceRest.chatCompletion(user, context)
+    const response = await InferenceRest.chatCompletion(user, model, context)
     console.log('response.choices', response.choices)
     const content = response.choices[0]?.message?.content ?? ''
     return content + '\n\n'

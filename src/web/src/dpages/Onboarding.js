@@ -8,13 +8,12 @@ import { ButtonSquared } from '../components/Button.js'
 import Form from '../components/Form.js'
 import { css } from 'goober'
 import Text from '../components/Text.js'
-import { useQuery } from '@apollo/client'
-import GetCurrentUser from '../graphql/GetCurrentUser.js'
 import sessionStore from '../stores/SessionStore.js'
 import UpdateSettings from '../graphql/mutation/UpdateSettingsMutation.js'
 import nonMaybe from 'non-maybe'
 import Colors from '../Colors.js'
 import reportEvent from '../utils/reportEvent.js'
+import MarkdownText from '../components/MarkdownText.js'
 
 const styles = {
   page: css`
@@ -66,19 +65,29 @@ const Onboarding: any = () => {
     reportEvent('onboarding load', {})
   }, [])
 
-  const [apiBase, setApiBase] = useState('')
-  const [apiKey, setApiKey] = useState('')
+  const [models, setModels] = useState('')
   const [inFlight, setInFlight] = useState(false)
 
-  function handleApiKeyChange(e: any) {
-    setApiKey(e.target.value)
+  function handleModelsChange(e: any) {
+    setModels(e.target.value)
   }
 
-  function handleApiBaseChange(e: any) {
-    setApiBase(e.target.value)
+  let isParseable
+  let parsedModels
+  try {
+    parsedModels = JSON.parse(models)
+    isParseable = true
+  } catch (err) {
+    console.error(err)
+    isParseable = false
   }
 
-  const disabled = !apiBase || inFlight
+  const disabled =
+    inFlight ||
+    !models ||
+    !isParseable ||
+    !Array.isArray(parsedModels) ||
+    !parsedModels?.length
   function submitChanges() {
     if (disabled) {
       return
@@ -86,11 +95,11 @@ const Onboarding: any = () => {
     setInFlight(true)
     UpdateSettings({
       sessionToken: nonMaybe(sessionStore.sessionToken),
-      apiBase,
-      apiKey,
+      models,
     }).then(async (res) => {
       reportEvent('onboarding complete', {})
       setInFlight(false)
+      sessionStore.connectSocket()
     })
   }
 
@@ -98,22 +107,36 @@ const Onboarding: any = () => {
     <Body className={styles.page}>
       <Form className={styles.form}>
         <LineBreak />
-        <Text>{'Please enter the details of your inference server.'}</Text>
+        <Text>{'Please enter the details of your inference servers.'}</Text>
+        <LineBreak />
+        <MarkdownText>{`Here is an example:
+        
+\`\`\`
+[
+  {
+    "title": "GPT-3.5",
+    "apiBase": "https://api.openai.com",
+    "apiKey": "sk-1234567890abcdefg",
+    "completionOptions": {
+      "model": "gpt-3.5-turbo"
+    }
+  },
+  {
+    "title": "LM Studio",
+    "apiBase": "http://localhost:1234"
+  }
+]
+\`\`\`
+`}</MarkdownText>
         <LineBreak />
         <TextField
           className={'text-field name-field'}
-          label={'API Base URL'}
-          value={apiBase}
-          onInput={handleApiBaseChange}
+          label={'Models Config'}
+          value={models}
+          onInput={handleModelsChange}
           onEnterPress={submitChanges}
+          multiline
           autoFocus
-        />
-        <TextField
-          className={'text-field name-field'}
-          label={'API Key (Optional)'}
-          value={apiKey}
-          onInput={handleApiKeyChange}
-          onEnterPress={submitChanges}
         />
         <LineBreak />
         <ButtonSquared

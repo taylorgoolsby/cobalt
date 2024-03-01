@@ -10,6 +10,14 @@ import AgencyInterface from '../Agency/AgencyInterface.js'
 import AuthTokenInterface from '../AuthToken/AuthTokenInterface.js'
 import type { AuthTokenSQL } from '../AuthToken/AuthTokenSchema.js'
 
+export type ModelConfig = {
+  // This tries to conform to the naming scheme used by continue.dev config: https://continue.dev/docs/reference/Model%20Providers/openai
+  title: string,
+  apiBase: string,
+  apiKey?: ?string,
+  completionOptions?: ?{ ... },
+}
+
 export type UserSQL = {|
   userId: string,
   combinedUserId: string,
@@ -37,12 +45,7 @@ export type UserSQL = {|
   oauthIdGithub: ?string,
   oauthIdGoogle: ?string,
   openAiKey: ?string,
-  inferenceServerConfig: {
-    // This tries to conform to the naming scheme used by continue.dev config: https://continue.dev/docs/reference/Model%20Providers/openai
-    apiBase?: ?string,
-    apiKey?: ?string,
-    completionOptions?: ?{ ... },
-  },
+  models: Array<ModelConfig>,
   gptModels: Array<string>,
   dateUpdated: string,
   dateCreated: string,
@@ -79,7 +82,7 @@ export const typeDefs: any = gql`
         nullable: true
       )
     openAiKey: String @sql(type: "VARCHAR(256)", nullable: true) @private
-    inferenceServerConfig: JSON @sql(type: "JSON")
+    models: JSON @sql(type: "JSON")
     gptModels: JSON @sql(type: "JSON")
     dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
     dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
@@ -179,7 +182,7 @@ export const resolvers: ResolverDefs = {
       // https://api.openai.com
       // It may or may not end with a trailing slash. We will normalize it and store it in DB with no trailing slash.
       // They must specify the protocol, but we check if it is http or https.
-      return !!user.inferenceServerConfig?.apiBase
+      return !!user.models?.length
     }),
     hasPassword: resolver(async (user: UserSQL, args, ctx) => {
       if (!ctx.isAuthenticated) {

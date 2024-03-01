@@ -20,18 +20,18 @@ async function loadChatHandler(user: UserSQL, data: LoadChatInput) {
   // if (!openAiKey) {
   //   throw new Error('Unauthorized')
   // }
-  const apiBase = user?.inferenceServerConfig?.apiBase
-  if (!apiBase) {
-    throw new Error('Unauthorized')
-  }
-  const apiKey = user?.inferenceServerConfig?.apiKey
-  const isOpenAi =
-    user?.inferenceServerConfig?.apiBase === 'https://api.openai.com'
-  if (isOpenAi) {
-    if (!apiKey) {
-      throw new Error('Unauthorized')
-    }
-  }
+  // const apiBase = user?.inferenceServerConfig?.apiBase
+  // if (!apiBase) {
+  //   throw new Error('Unauthorized')
+  // }
+  // const apiKey = user?.inferenceServerConfig?.apiKey
+  // const isOpenAi =
+  //   user?.inferenceServerConfig?.apiBase === 'https://api.openai.com'
+  // if (isOpenAi) {
+  //   if (!apiKey) {
+  //     throw new Error('Unauthorized')
+  //   }
+  // }
 
   if (!data.agencyId) {
     throw new Error('JSON body missing agencyId')
