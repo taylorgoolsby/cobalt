@@ -49,6 +49,7 @@ import { getCallbacks } from '../websocket/callbacks.js'
 import { dequeue, enqueue } from './mindQueue.js'
 import type { UserSQL } from '../schema/User/UserSchema.js'
 import { encodeChat } from 'gpt-tokenizer'
+import ShortTermSummarization from './ShortTermSummarization.js'
 
 export default class AgentMind {
   static chatIteration(
@@ -96,13 +97,27 @@ export default class AgentMind {
         const truncatedMessages = startingMessages.slice(0, -1)
         const lastMessage = startingMessages[startingMessages.length - 1]
 
-        console.log('truncatedMessages', truncatedMessages)
         console.log('lastMessage', lastMessage)
 
-        const context: Array<GPTMessage> = startingMessages.map((m) => ({
-          role: m.role.toLowerCase(),
-          content: m.data.text,
-        }))
+        const shortTermSummary = await ShortTermSummarization.performCompletion(
+          user,
+          truncatedMessages,
+        )
+
+        console.log('shortTermSummary', shortTermSummary)
+
+        const context: Array<GPTMessage> = [
+          {
+            role: 'system',
+            content: `You are a helpful assistant. You will be given a prompt from the user and relevant context. Use all information to generate a helpful response.`,
+          },
+          {
+            role: 'user',
+            content: `${shortTermSummary}${lastMessage.data.text}`,
+          },
+        ]
+
+        console.log('final context', context)
 
         const tokens = encodeChat(context, 'gpt-3.5-turbo')
         console.log('tokens', tokens.length)
