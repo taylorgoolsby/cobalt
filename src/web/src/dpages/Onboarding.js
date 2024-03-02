@@ -131,7 +131,7 @@ const Onboarding: any = () => {
         <LineBreak />
         <TextField
           className={'text-field name-field'}
-          label={'Models Config'}
+          label={'Models Configuration'}
           value={models}
           onInput={handleModelsChange}
           onEnterPress={submitChanges}

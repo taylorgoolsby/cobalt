@@ -634,14 +634,14 @@ const Chat = observer((props: ChatProps): any => {
         selectedModel={selectedModel}
         onSelectModel={onSelectModel}
       />
-      <Button
-        className={'button settings-button'}
-        onClick={() => {
-          history?.push('/app/settings')
-        }}
-      >
-        <Text>{'Settings'}</Text>
-      </Button>
+      {/*<Button*/}
+      {/*  className={'button settings-button'}*/}
+      {/*  onClick={() => {*/}
+      {/*    history?.push('/app/settings')*/}
+      {/*  }}*/}
+      {/*>*/}
+      {/*  <Text>{'Settings'}</Text>*/}
+      {/*</Button>*/}
     </View>
   )
 })

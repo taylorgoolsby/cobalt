@@ -30,6 +30,7 @@ import AddEmailWizard from '../wizards/AddEmailWizard.js'
 import LoginWizard from '../wizards/LoginWizard.js'
 import ChangeOpenAiKeyWizard from '../wizards/ChangeOpenAiKeyWizard.js'
 import { getHistory } from '../utils/history.js'
+import MarkdownText from '../components/MarkdownText.js'
 
 const styles = {
   page: css`
@@ -788,10 +789,30 @@ class Settings extends Component<any, State> {
           {/*</FormSection>*/}
           <LineBreak />
           <LineBreak />
+          <MarkdownText>{`Models Configuration Example
+        
+\`\`\`
+[
+  {
+    "title": "GPT-3.5",
+    "apiBase": "https://api.openai.com",
+    "apiKey": "sk-1234567890abcdefg",
+    "completionOptions": {
+      "model": "gpt-3.5-turbo"
+    }
+  },
+  {
+    "title": "LM Studio",
+    "apiBase": "http://localhost:1234"
+  }
+]
+\`\`\`
+`}</MarkdownText>
+          <LineBreak />
           {loaded ? (
             <TextField
               className={'text-field name-field'}
-              label={'Models Config'}
+              label={'Models Configuration'}
               value={modelsString}
               onInput={this.handleModelsStringChange}
               onEnterPress={this.submitChanges}
