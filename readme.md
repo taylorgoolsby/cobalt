@@ -1,6 +1,6 @@
-# RAG with Memory
+# Cobalt
 
-This project uses a RAG technique to implement long term memory. There is also an implementation for short term memory. Together, these enable a chatbot which only requires a single chat window for interaction. There are no new chats. Users can simply open the app and begin talking.
+This is an AI project which combines a RAG-like technique with memory management. Together, these enable a chatbot which only requires a single chat window for interaction. There are no new chats. Users can simply open the app and begin talking.
 
 ## Use Cases
 
