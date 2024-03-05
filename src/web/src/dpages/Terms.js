@@ -69,11 +69,11 @@ Effective date: 12/6/2023
 
 1. <a id="introduction" href="#introduction">Introduction</a>
 
-  Welcome to **chatbro.online** (“**Company**”, “**we**”, “**our**”, “**us**”)! As you have just clicked our Terms of Service, please pause, grab a cup of coffee and carefully read the following pages. It will take you approximately 20 minutes.
+  Welcome to **cobalt.online** (“**Company**”, “**we**”, “**our**”, “**us**”)! As you have just clicked our Terms of Service, please pause, grab a cup of coffee and carefully read the following pages. It will take you approximately 20 minutes.
   
-  These Terms of Service (“**Terms**”, “**Terms of Service**”) govern your use of our web pages located at [chatbro.online](https://chatbro.online) (“**Service**”) and operated by Taylor Goolsby.
+  These Terms of Service (“**Terms**”, “**Terms of Service**”) govern your use of our web pages located at [cobalt.online](https://cobalt.online) (“**Service**”) and operated by Taylor Goolsby.
   
-  Our Privacy Policy also governs your use of our Services and explains how we collect, safeguard and disclose information that results from your use of our web pages. Please read it here [chatbro.online/privacy](https://chatbro.online/privacy).
+  Our Privacy Policy also governs your use of our Services and explains how we collect, safeguard and disclose information that results from your use of our web pages. Please read it here [cobalt.online/privacy](https://cobalt.online/privacy).
   
   Your agreement with us includes these Terms and our Privacy Policy (“**Agreements**”). You acknowledge that you have read and understood Agreements, and agree to be bound of them.
   
@@ -129,7 +129,7 @@ Effective date: 12/6/2023
 
 8. <a id="fee-changes" href="#fee-changes">Fee Changes</a>
 
-  chatbro.online, in its sole discretion and at any time, may modify Subscription fees for the Subscriptions. Any Subscription fee change will become effective at the end of the then-current Billing Cycle.
+  cobalt.online, in its sole discretion and at any time, may modify Subscription fees for the Subscriptions. Any Subscription fee change will become effective at the end of the then-current Billing Cycle.
   
   We will provide you with a reasonable prior notice of any change in Subscription fees to give you an opportunity to terminate your Subscription before such change becomes effective.
   
@@ -147,9 +147,9 @@ Effective date: 12/6/2023
   
   You retain any and all of your rights to any Content you submit, post or display on or through our Services and you are responsible for protecting those rights. We take no responsibility and assume no liability for Content you or any third party posts on or through our Services. However, by posting Content using our Services you grant us the right and license to use, modify, publicly perform, publicly display, reproduce, and distribute such Content on and through our Services. You agree that this license includes the right for us to make your Content available to other users of our Services, who may also use your Content subject to these Terms.
   
-  chatbro.online has the right but not the obligation to monitor and edit all Content provided by users.
+  cobalt.online has the right but not the obligation to monitor and edit all Content provided by users.
   
-  In addition, Content found on or through these Services are the property of chatbro.online or used with permission. You may not distribute, modify, transmit, reuse, download, repost, copy, or use said Content, whether in whole or in part, for commercial purposes or for personal gain, without express advance written permission from us.
+  In addition, Content found on or through these Services are the property of cobalt.online or used with permission. You may not distribute, modify, transmit, reuse, download, repost, copy, or use said Content, whether in whole or in part, for commercial purposes or for personal gain, without express advance written permission from us.
 
 11. <a id="prohibited-uses" href="#prohibited-uses">Prohibited Uses</a>
 
@@ -456,7 +456,7 @@ Effective date: 12/6/2023
   <br/>
   By email: <Contact/>.
   <br/>
-<!--  By visiting this page on our website: [chatbro.online/contact](https://chatbro.online/contact).-->
+<!--  By visiting this page on our website: [cobalt.online/contact](https://cobalt.online/contact).-->
 `.trim()
 
 const Terms = (): any => {

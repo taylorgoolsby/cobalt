@@ -69,7 +69,7 @@ Effective date: 12/6/2023
 
 1. ## [Introduction](#introduction)
 
-   At chatbro.online, we believe in being clear and open about how we collect and use data related to you. This policy provides detailed information about how and when we use cookies. By accessing and using our website and services, you indicate that you understand and agree to this policy.
+   At cobalt.online, we believe in being clear and open about how we collect and use data related to you. This policy provides detailed information about how and when we use cookies. By accessing and using our website and services, you indicate that you understand and agree to this policy.
 
 2. ## [What are Cookies?](#what-are-cookies)
 
@@ -113,35 +113,35 @@ Effective date: 12/6/2023
    
 6. ## [Changing Your Cookie Preferences](#changing-your-cookie-preferences)
 
-If you wish to change your cookie preferences on chatbro.online, you can do so by deleting the site's local storage data in your browser. This will prompt the cookie settings banner to reappear, allowing you to modify your settings upon reloading the website. Follow these steps to delete the local storage:
+If you wish to change your cookie preferences on cobalt.online, you can do so by deleting the site's local storage data in your browser. This will prompt the cookie settings banner to reappear, allowing you to modify your settings upon reloading the website. Follow these steps to delete the local storage:
 
 1. **Google Chrome**:
    - Click on the three dots in the top right corner and select 'Settings'.
    - Go to 'Privacy and security' and click on 'Third-party cookies'.
-   - Find 'See all site data and permissions' and search for 'chatbro.online'.
+   - Find 'See all site data and permissions' and search for 'cobalt.online'.
    - Click on the 'Remove' button next to the site's local storage data.
 
 2. **Mozilla Firefox**:
    - Click on the three lines in the top right corner and select 'Settings'.
    - Go to 'Privacy & Security' and scroll down to 'Cookies and Site Data'.
-   - Click on 'Manage Data', find 'chatbro.online', and click 'Remove Selected'.
+   - Click on 'Manage Data', find 'cobalt.online', and click 'Remove Selected'.
 
 3. **Safari (Mac)**:
    - Go to 'Safari' in the menu bar and select 'Settings'.
    - Choose the 'Privacy' tab and click on 'Manage Website Data'.
-   - Find 'chatbro.online' in the list and click 'Remove'.
+   - Find 'cobalt.online' in the list and click 'Remove'.
 
 4. **Microsoft Edge**:
    - Click on the three dots in the top right corner and select 'Settings'.
    - Choose 'Cookies and site permissions' and then 'Manage and delete cookies and site data'.
    - Click on 'See all cookies and site data'.
-   - Search for 'chatbro.online' and delete the local storage data.
+   - Search for 'cobalt.online' and delete the local storage data.
 
 **Please Note**: The steps may vary slightly depending on your browser version and any updates. Check your browser's help section for the most accurate instructions.
 
-After deleting the local storage for chatbro.online, reload the website. The cookie settings banner will reappear, allowing you to adjust your cookie preferences as desired.
+After deleting the local storage for cobalt.online, reload the website. The cookie settings banner will reappear, allowing you to adjust your cookie preferences as desired.
 
-7. ## [Third-Party Cookies in Use on chatbro.online](#third-party-cookies-in-use-on-chatbro)
+7. ## [Third-Party Cookies in Use on cobalt.online](#third-party-cookies-in-use-on-cobalt)
 
    We utilize third-party services for analytics and functionality enhancements on our website. Below is a simplified table detailing the third-party cookies we use:
 

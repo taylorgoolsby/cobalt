@@ -218,7 +218,7 @@ const CookieModalContents = observer((props: CookieModalContentsProps): any => {
   return (
     <View className={styles.contents}>
       <Text className="preface">
-        When you visit chatbro.online, we may use cookies and similar
+        When you visit cobalt.online, we may use cookies and similar
         technologies to collect information about your browsing experience and
         preferences. This helps us provide you with a more personalized service
         and improve our website. Here, you can customize your cookie

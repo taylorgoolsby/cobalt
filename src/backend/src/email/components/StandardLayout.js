@@ -48,7 +48,7 @@ const StandardLayout: AbstractComponent<Props, any> = (props: Props) => {
               border-radius="4px"
               width="34px"
               height="34px"
-              src="https://chatbro-public-assets.s3.us-east-2.amazonaws.com/a-g-square.png"
+              src="https://cobalt-public-assets.s3.us-east-2.amazonaws.com/a-g-square.png"
               href={Config.webHost}
             />
           </MjmlColumn>

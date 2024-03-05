@@ -14,22 +14,22 @@ export default class Document extends NextDocument {
       <Html lang="en">
         <Head>
           <meta charSet="UTF-8" />
-          <meta property="og:title" content="chatbro" />
+          <meta property="og:title" content="cobalt" />
           {/*<meta property="og:type" content="website" />*/}
-          {/*<meta property="og:url" content="https://chatbro.online" />*/}
+          {/*<meta property="og:url" content="https://cobalt.online" />*/}
           {/*<meta*/}
           {/*  property="og:image"*/}
-          {/*  content="https://chatbro-public-assets.s3.us-east-2.amazonaws.com/chatbro.png"*/}
+          {/*  content="https://cobalt-public-assets.s3.us-east-2.amazonaws.com/cobalt.png"*/}
           {/*/>*/}
           {/*<meta property="og:description" content="A UI for multiagent AI" />*/}
           {/*<meta name="twitter:card" content="summary_large_image" />*/}
-          {/*<meta name="twitter:site" content="@chatbro" />*/}
+          {/*<meta name="twitter:site" content="@cobalt" />*/}
           {/*<meta name="twitter:creator" content="@tay2win" />*/}
-          {/*<meta name="twitter:title" content="chatbro.online" />*/}
+          {/*<meta name="twitter:title" content="cobalt.online" />*/}
           {/*<meta name="twitter:description" content="A UI for multiagent AI" />*/}
           {/*<meta*/}
           {/*  name="twitter:image"*/}
-          {/*  content="https://chatbro-public-assets.s3.us-east-2.amazonaws.com/chatbro.png"*/}
+          {/*  content="https://cobalt-public-assets.s3.us-east-2.amazonaws.com/cobalt.png"*/}
           {/*/>*/}
 
           {GoogleFonts()}

@@ -162,7 +162,7 @@ handleAuthentication(app, {
       //  This will need to be changed by still passing the caller's userId,
       //  but the openai key is retrieved from the organization level.
       //  Ownership can still be done from userId.
-      //  chatbro keys are then assigned to users in order to get a
+      //  cobalt keys are then assigned to users in order to get a
       //  userId from the key.
       //  This is similar to how in AWS, a bot user is created with
       //  programmatic access credentials.

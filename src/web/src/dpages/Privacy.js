@@ -69,11 +69,11 @@ Effective date: 12/6/2023
  
 1. <a id="introduction" href="#introduction">Introduction</a>
  
-  Welcome to **chatbro.online**.
+  Welcome to **cobalt.online**.
    
-  Taylor Goolsby (“**us**”, “**we**”, or “**our**”) operates [chatbro.online](https://chatbro.online) (hereinafter referred together as “**Services**”, individually “**Service**”).
+  Taylor Goolsby (“**us**”, “**we**”, or “**our**”) operates [cobalt.online](https://cobalt.online) (hereinafter referred together as “**Services**”, individually “**Service**”).
    
-  Our Privacy Policy governs your visit to chatbro.online, and explains how we collect, safeguard and disclose information that results from your use of our Services. 
+  Our Privacy Policy governs your visit to cobalt.online, and explains how we collect, safeguard and disclose information that results from your use of our Services. 
    
   We use your data to provide and improve our Services. By using our Services, you agree to the collection and use of information in accordance with this policy. Unless otherwise defined in this Privacy Policy, the terms used in this Privacy Policy have the same meanings as in our Terms and Conditions.
    
@@ -81,7 +81,7 @@ Effective date: 12/6/2023
  
 2. <a id="definitions" href="#definitions">Definitions</a>
  
-  **SERVICES** means the chatbro.online website operated by Taylor Goolsby.
+  **SERVICES** means the cobalt.online website operated by Taylor Goolsby.
    
   **PERSONAL DATA** means data about a living individual who can be identified from those data (or from those and other information either in our possession or likely to come into our possession).
    
@@ -339,7 +339,7 @@ Effective date: 12/6/2023
        
       By email: <Contact/>
       
-<!--      By visiting this page on our website: [chatbro.online/contact](https://chatbro.online/contact)-->
+<!--      By visiting this page on our website: [cobalt.online/contact](https://cobalt.online/contact)-->
 
   Your data protection rights, described above, are covered by the CCPA, short for the California Consumer Privacy Act. To find out more, visit the official [California Legislative Information](https://leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=201720180AB375) website. The CCPA took effect on 01/01/2020. 
  
@@ -728,7 +728,7 @@ Effective date: 12/6/2023
   <br/> 
   By email: <Contact/>.
    <br/>
-<!--  By visiting this page on our website: [chatbro.online/contact](https://chatbro.online/contact).-->
+<!--  By visiting this page on our website: [cobalt.online/contact](https://cobalt.online/contact).-->
 `.trim()
 
 const Privacy = (): any => {

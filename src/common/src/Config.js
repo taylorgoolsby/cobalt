@@ -87,7 +87,7 @@ const backendHost = isLocal
   ? `http://localhost:${port}`
   : nonMaybe(WEB_BACKEND_HOST)
 
-const dbDatabase = isLocal ? 'local_chatbro' : nonMaybe(DB_DATABASE)
+const dbDatabase = isLocal ? 'local_cobalt' : nonMaybe(DB_DATABASE)
 console.log('dbDatabase', dbDatabase)
 
 const oauthGithubClientId = OAUTH_GITHUB_CLIENT_ID
@@ -114,7 +114,7 @@ delete cdkEnvironment['AWS_PROFILE']
 const awsResourceBaseName: string = nonMaybe(AWS_RESOURCE_BASE_NAME)
 
 class Config {
-  static appName: string = 'chatbro'
+  static appName: string = 'cobalt'
   static cdkEnvironment: { [string]: any } = cdkEnvironment
   static version: string = nonMaybe(version)
   static stage: string = stage

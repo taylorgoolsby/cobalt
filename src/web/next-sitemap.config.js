@@ -1,5 +1,5 @@
 module.exports = {
-  siteUrl: 'https://chatbro.online',
+  siteUrl: 'https://cobalt.online',
   generateRobotsTxt: true,
   generateIndexSitemap: false,
 }
