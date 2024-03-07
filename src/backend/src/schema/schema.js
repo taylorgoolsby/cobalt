@@ -15,12 +15,14 @@ import * as Block from './Block/BlockSchema.js'
 import * as Viewer from './Viewer/ViewerSchema.js'
 import * as Version from './Version/VersionSchema.js'
 import * as CombinedUser from './CombinedUser/CombinedUserSchema.js'
+import * as Completion from './Completion/CompletionSchema.js'
 import * as User from './User/UserSchema.js'
 import * as UsageLog from './UsageLog/UsageLogSchema.js'
 import * as DataTransferLog from './DataTransferLog/DataTransferLogSchema.js'
 import * as File from './File/FileSchema.js'
 import * as Instruction from './Instruction/InstructionSchema.js'
 import * as Message from './Message/MessageSchema.js'
+import * as ShortTermMemory from './ShortTermMemory/ShortTermMemorySchema.js'
 import * as Mutation from '../mutation/Mutation.js'
 import type { ResolverDefs } from '../utils/resolver.js'
 import resolver from '../utils/resolver.js'
@@ -65,12 +67,14 @@ export const typeDefs: any = gql`
   ${Viewer.typeDefs}
   ${Version.typeDefs}
   ${CombinedUser.typeDefs}
+  ${Completion.typeDefs}
   ${User.typeDefs}
   ${UsageLog.typeDefs}
   ${DataTransferLog.typeDefs}
   ${File.typeDefs}
   ${Instruction.typeDefs}
   ${Message.typeDefs}
+  ${ShortTermMemory.typeDefs}
   ${Mutation.typeDefs}
 
   type Query {

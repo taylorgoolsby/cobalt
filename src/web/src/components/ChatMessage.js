@@ -368,7 +368,7 @@ const ChatMessage: (ChatMessageProps) => any = observer(
             {profilePictureUrl ? <PiUserBold /> : <PiUserBold />}
           </View>
           <Text className={'name'}>{name}</Text>
-          {linkedMessage}
+          {/*{linkedMessage}*/}
         </View>
         <MarkdownText className={'row message-text'}>
           {!message.completed

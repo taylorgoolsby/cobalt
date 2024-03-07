@@ -38,17 +38,16 @@ import MessageInterface from '../schema/Message/MessageInterface.js'
 import type { GPTMessage } from '../rest/InferenceRest.js'
 import InferenceRest from '../rest/InferenceRest.js'
 import type { ChatCompletionsResponse } from '../rest/InferenceRest.js'
-import { MessageRole, MessageType } from '../schema/Message/MessageSchema.js'
+import { MessageRole } from '../schema/Message/MessageSchema.js'
 import type {
   AppendMessageOutput,
   UpdateMessageOutput,
 } from '../websocket/callbacks.js'
 import AgentInterface from '../schema/Agent/AgentInterface.js'
-import AgentConversationInterface from '../schema/AgentConversation/AgentConversationInterface.js'
+// import AgentConversationInterface from '../schema/AgentConversation/AgentConversationInterface.js'
 import { getCallbacks } from '../websocket/callbacks.js'
-import { dequeue, enqueue } from './mindQueue.js'
+// import { dequeue, enqueue } from './mindQueue.js'
 import type { ModelConfig, UserSQL } from '../schema/User/UserSchema.js'
-import { encodeChat } from 'gpt-tokenizer'
 import ShortTermSummarization from './ShortTermSummarization.js'
 
 export default class AgentMind {
@@ -92,21 +91,18 @@ export default class AgentMind {
         // See readme.md for an overview of the chat iteration process.
 
         // Get all messages for this conversation:
-        const startingMessages = await MessageInterface.getAll(
-          agentConversationId,
-        )
+        const allMessages = await MessageInterface.getAll(agentConversationId)
 
-        const truncatedMessages = startingMessages.slice(0, -1)
-        const lastMessage = startingMessages[startingMessages.length - 1]
+        const lastMessage = allMessages[allMessages.length - 1]
 
         console.log('lastMessage', lastMessage)
 
         const shortTermSummary = await ShortTermSummarization.performCompletion(
           user,
           model,
-          truncatedMessages,
+          agencyConversationId,
+          allMessages,
         )
-
         console.log('shortTermSummary', shortTermSummary)
 
         const context: Array<GPTMessage> = [
@@ -114,16 +110,25 @@ export default class AgentMind {
             role: 'system',
             content: `You are a helpful assistant. You will be given a prompt from the user and relevant context. Use all information to generate a helpful response.`,
           },
+          shortTermSummary
+            ? {
+                role: 'assistant',
+                content: shortTermSummary,
+              }
+            : null,
           {
             role: 'user',
-            content: `${shortTermSummary}${lastMessage.data.text}`,
+            content: lastMessage.data.text,
           },
+          // {
+          //   role: 'user',
+          //   content: `${shortTermSummary ? `${shortTermSummary}\n\n` : ''}${lastMessage.data.text}`,
+          // },
         ]
+          // $FlowFixMe
+          .filter((a) => !!a)
 
         console.log('final context', context)
-
-        const tokens = encodeChat(context, 'gpt-3.5-turbo')
-        console.log('tokens', tokens.length)
 
         let newIterationWillBeStarted = false
 

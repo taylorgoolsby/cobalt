@@ -136,6 +136,17 @@ type Version {
   dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
 }
 
+type Completion {
+  completionId: Int @sql(primary: true, auto: true)
+  agencyConversationId: String @sql(type: "BINARY(16)", index: true)
+  type: String @sql(type: "ENUM('GENERAL','SHORT_TERM_MEMORY','LONG_TERM_MEMORY')")
+  model: String @sql(type: "VARCHAR(255)")
+  inputs: JSON @sql(type: "JSON")
+  output: JSON @sql(type: "JSON")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
 type User {
   userId: String @sql(type: "BINARY(16)", primary: true)
   combinedUserId: String @sql(type: "BINARY(16)", index: true)
@@ -234,6 +245,16 @@ type Message {
   linkedMessageId: Int @sql(type: "INT", nullable: true)
   data: MessageData @sql(type: "JSON")
   dateUpdated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
+type ShortTermMemory {
+  shortTermMemoryId: Int @sql(primary: true, auto: true)
+  agencyConversationId: String @sql(type: "BINARY(16)", index: true)
+  model: String @sql(type: "VARCHAR(255)")
+  inputs: JSON @sql(type: "JSON")
+  summary: String @sql(type: "TEXT", unicode: true)
   dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
   id: String
 }

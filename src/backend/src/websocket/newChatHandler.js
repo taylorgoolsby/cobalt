@@ -20,6 +20,7 @@ const newChatHandler = async (
   //   throw new Error('Unauthorized')
   // }
   // Ensure that user.models has a model defined which matches the data.modelTitle:
+  console.log('data.modelTitle', data.modelTitle)
   const model = user.models.find((model) => model.title === data.modelTitle)
   if (!model) {
     throw new Error('That model does not exist in your account.')

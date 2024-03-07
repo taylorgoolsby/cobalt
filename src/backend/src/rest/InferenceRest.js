@@ -180,6 +180,8 @@ export default class InferenceRest {
             response.data.on('data', (chunk) => {
               const data = chunk.toString()
 
+              if (data === undefined) return
+
               dataLog.push(data)
 
               buffer += data
@@ -187,7 +189,12 @@ export default class InferenceRest {
               const items = buffer.split('\n\n')
 
               for (let i = 0; i < items.length; i++) {
-                const item = items[i]
+                let item = items[i]
+
+                // item might end with 0, 1, or 2 new lines.
+                // So the next item might start with 2, 1, or 0 new lines.
+                // Remove any newlines at the beginning:
+                item = item.replace(/^\n+/, '')
 
                 if (item === '') continue
 

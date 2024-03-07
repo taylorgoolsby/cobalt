@@ -794,6 +794,14 @@ class Settings extends Component<any, State> {
 \`\`\`
 [
   {
+    "title": "GPT-4",
+    "apiBase": "https://api.openai.com",
+    "apiKey": "sk-1234567890abcdefg",
+    "completionOptions": {
+      "model": "gpt-4"
+    }
+  },
+  {
     "title": "GPT-3.5",
     "apiBase": "https://api.openai.com",
     "apiKey": "sk-1234567890abcdefg",
@@ -815,7 +823,6 @@ class Settings extends Component<any, State> {
               label={'Models Configuration'}
               value={modelsString}
               onInput={this.handleModelsStringChange}
-              onEnterPress={this.submitChanges}
               multiline
               autoFocus
             />

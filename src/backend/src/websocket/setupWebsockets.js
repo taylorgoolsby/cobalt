@@ -114,9 +114,7 @@ export default function setupWebsockets(app: any): any {
       if (socket.handshake.query.sessionToken) {
         const sessionToken = socket.handshake.query.sessionToken
         const session: SessionToken = await createViewer(sessionToken, {})
-        console.log('session', session)
         user = await UserInterface.getUser(session.userId)
-        console.log('user', user)
         listenToEverything = true
       } else if (socket.handshake.query.demoSessionToken) {
         throw new Error('demoSessionToken is no longer supported')
@@ -187,7 +185,6 @@ export default function setupWebsockets(app: any): any {
       // }
       const models = user?.models
       // Ensure the user has at least one model defined:
-      console.log('models', models)
       if (!models || !models?.length) {
         throw new Error(
           'You must define at least one model to use the chat API.',

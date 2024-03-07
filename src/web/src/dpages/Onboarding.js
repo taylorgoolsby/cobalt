@@ -114,6 +114,14 @@ const Onboarding: any = () => {
 \`\`\`
 [
   {
+    "title": "GPT-4",
+    "apiBase": "https://api.openai.com",
+    "apiKey": "sk-1234567890abcdefg",
+    "completionOptions": {
+      "model": "gpt-4"
+    }
+  },
+  {
     "title": "GPT-3.5",
     "apiBase": "https://api.openai.com",
     "apiKey": "sk-1234567890abcdefg",
@@ -134,7 +142,6 @@ const Onboarding: any = () => {
           label={'Models Configuration'}
           value={models}
           onInput={handleModelsChange}
-          onEnterPress={submitChanges}
           multiline
           autoFocus
         />

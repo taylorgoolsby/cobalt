@@ -7,6 +7,59 @@ import type {
 import InferenceRest from '../rest/InferenceRest.js'
 import type { ModelConfig, UserSQL } from '../schema/User/UserSchema.js'
 import type { MessageSQL } from '../schema/Message/MessageSchema.js'
+import ShortTermMemoryInterface from '../schema/ShortTermMemory/ShortTermMemoryInterface.js'
+import { encode } from 'gpt-tokenizer'
+
+const SHORT_TERM_SUMMARY_TOKEN_SIZE = (2048 * 1.5) / 7
+// The number of tokens for a single short term memory completion call:
+const SHORT_TERM_COMPLETION_TOKEN_LIMIT = 2048 - SHORT_TERM_SUMMARY_TOKEN_SIZE
+
+/*
+Example 1:
+
+input:
+```
+user: I'm hungry. What is there to eat?
+
+assistant: Your fridge has ingredients to make a sandwich or a salad.
+
+user: I don't want either. Who is open for take out?
+
+assistant: There is a pizza place and a Chinese restaurant open.
+
+previous summary: You are hungry and trying to find something to eat, and your fridge has ingredients to make a sandwich or a salad.
+```
+
+output:
+```
+We are looking for something to eat. At home you could make a sandwich or salad, but you don't want those. Outside, pizza or Chinese are options.
+```
+
+Example 2:
+
+input:
+```
+user: I'm hungry. What is there to eat?
+
+assistant: Your fridge has ingredients to make a sandwich or a salad.
+
+user: I don't want either. Who is open for take out?
+
+assistant: There is a pizza place and a Chinese restaurant open.
+
+user: I don't want pizza or Chinese. I want something else.
+
+assistant: There's Thai, but they don't do take out.
+
+previous summary: We are looking for something to eat. At home you could make a sandwich or salad, but you don't want those. Outside, pizza or Chinese are options.
+```
+
+output:
+```
+We are looking for something to eat. At home you could make a sandwich or salad, but you don't want those. Outside, pizza or Chinese are options. But you don't want those either. I suggested Thai, but they don't do take out.
+```
+*
+*/
 
 export default class ShortTermSummarization {
   /*
@@ -59,56 +112,67 @@ export default class ShortTermSummarization {
   static async performCompletion(
     user: UserSQL,
     model: ModelConfig,
-    truncatedMessages: Array<MessageSQL>,
-    lastPrompt: MessageSQL,
-    previousSummary: string,
+    agencyConversationId: string,
+    allMessages: Array<MessageSQL>,
   ): Promise<string> {
-    if (!messages.length) return ''
+    if (allMessages.length < 2) return ''
+
+    const previousMessages = allMessages.slice(0, allMessages.length - 1)
+
+    // const lastMessage = allMessages[allMessages.length - 1]
+
+    const previousSummary =
+      (await ShortTermMemoryInterface.getLast(agencyConversationId)) ?? 'N/A'
+
+    const systemMessage = `You are tasked with summarizing short-term memory dialogue. After each user interaction, update the summary to reflect all relevant information, including new developments, while retaining critical details such as the main topic, specific instructions, and key conditions. Summaries should evolve slowly, ensuring continuity and coherence. Your goal is to produce concise, updated summaries after each exchange. Here's how to approach it:
+
+1. Read the entire dialogue history and the provided previous summary.
+2. Identify new information added in the latest interaction.
+3. Merge this new information with the previous summary, ensuring that essential details are preserved and the narrative flows logically.
+4. Summarize in a way that reflects the progression of the dialogue, retaining focus on the main task, key instructions, and any boundary conditions mentioned.
+
+Examples:
+
+Input 1:
+    User: "Let's plan a trip to Japan. We need to decide on cities to visit."
+    Assistant: "Tokyo and Kyoto are must-visits for their unique blend of history and modernity."
+    Previous summary: "Planning a trip to Japan, deciding on cities."
+Output 1: "Planning a trip to Japan, focusing on cities like Tokyo and Kyoto for their historical and modern aspects."
+
+Input 2:
+    User: "What about activities? I want something unique."
+    Assistant: "In Tokyo, you can experience a traditional tea ceremony. Kyoto offers beautiful temple tours."
+    Previous summary: "Planning a trip to Japan, focusing on cities like Tokyo and Kyoto for their historical and modern aspects."
+Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities include a tea ceremony in Tokyo and temple tours in Kyoto."
+`
 
     let input = ''
 
-    const nonSystemMessages = messages.filter(
+    const nonSystemMessages = previousMessages.filter(
       (m) => m.role.toLowerCase() !== 'system',
     )
-    for (const m of nonSystemMessages) {
-      input += `${m.role.toLowerCase()}: ${m.data.text}\n\n`
+
+    for (let i = nonSystemMessages.length - 1; i >= 0; i--) {
+      const m = nonSystemMessages[i]
+      const nextInput = `${m.role.toLowerCase()}: ${m.data.text}\n\n` + input
+      const tokens = encode(
+        systemMessage + nextInput + `previous summary: ${previousSummary}`,
+        'gpt-3.5-turbo',
+      )
+      if (SHORT_TERM_COMPLETION_TOKEN_LIMIT < tokens.length) {
+        console.log('short term tokens', tokens.length)
+        break
+      }
+      input = nextInput
     }
+
+    // Finally, the previous summary should be in the input string:
+    input += `previous summary: ${previousSummary}` // don't forget to update token counting
 
     const context = [
       {
         role: 'system',
-        content: `You are a helpful assistant.
-
-You will be given a list of messages between the user and the assistant. Your task is to summarize the conversation into a single message. The summary should be a single message that captures the essence of the conversation. It should be a concise and accurate summary of the conversation, and should be written in a clear and understandable manner.
-
-Example 1:
-
-input:
-\`\`\`
-user: Can you please solve this equation for x? 2x + 5 = 11
-
-assistant: Sure, I can help you with that. To isolate the variable x, we need to subtract 5 from both sides of the equation and then divide by 2. This gives us: 2x = 6, x = 3. The solution is x = 3. Is there anything else you need help with?
-\`\`\`
-
-output:
-\`\`\`
-We are solving a math equation. The equation is 2x + 5 = 11, and we are solving for x. The solution I found was x = 3.
-\`\`\`
-
-Example:
-
-input:
-\`\`\`
-user: hi
-
-assistant: Hello! How can I help you today?
-\`\`\`
-
-output:
-\`\`\`
-We are greeting each other. You said "hi" and I said "Hello! How can I help you today?"
-\`\`\`
-`,
+        content: systemMessage,
       },
       {
         role: 'user',
@@ -116,11 +180,18 @@ We are greeting each other. You said "hi" and I said "Hello! How can I help you 
       },
     ]
 
-    console.log('short term summarization context', context)
+    console.log('context', context)
 
     const response = await InferenceRest.chatCompletion(user, model, context)
-    console.log('response.choices', response.choices)
-    const content = response.choices[0]?.message?.content ?? ''
-    return content + '\n\n'
+    const nextSummary = response.choices[0]?.message?.content ?? ''
+
+    await ShortTermMemoryInterface.insert(
+      agencyConversationId,
+      model.title,
+      context,
+      nextSummary,
+    )
+
+    return nextSummary
   }
 }
