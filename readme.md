@@ -61,7 +61,7 @@ A background process will eventually annotate the newly stored chat message with
 
 # Installation
 
-This project was built and tested on MacOS with Apple Silicon. It should work on other platforms, but it has not been tested. This project uses Node.js, MySQL, and Faiss. If you are using MacOS, this project should automatically install mysql for you using homebrew if you haven't already. If you are not using MacOS, you will need to install a MySQL and start it locally yourself.
+This project was built and tested on MacOS with Apple Silicon. It should work on other platforms, but it has not been tested. This project uses Node.js, MySQL, and Faiss. If you are using MacOS, this project should automatically install mysql for you using homebrew if you haven't already. If you are using another platform, you will need to install a MySQL server and start it locally yourself.
 
 1. Download the source code from the GitHub repository.
 2. `cd cobalt`
