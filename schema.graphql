@@ -98,6 +98,15 @@ type AgentConversation {
   messages: [Message!]!
 }
 
+type Annotation {
+  annotationId: Int @sql(primary: true)
+  messageId: Int @sql(type: "INT", index: true)
+  text: String @sql(type: "TEXT", unicode: true)
+  embedding: JSON @sql(type: "JSON")
+  dateCreated: String @sql(type: "TIMESTAMP", default: "CURRENT_TIMESTAMP")
+  id: String
+}
+
 type AuthToken {
   authTokenId: String @sql(type: "BINARY(16)", primary: true)
   agencyVersionId: Int @sql(type: "INT", index: true)

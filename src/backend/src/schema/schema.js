@@ -10,6 +10,7 @@ import * as Agency from './Agency/AgencySchema.js'
 import * as AgencyConversation from './AgencyConversation/AgencyConversationSchema.js'
 import * as Agent from './Agent/AgentSchema.js'
 import * as AgentConversation from './AgentConversation/AgentConversationSchema.js'
+import * as Annotation from './Annotation/AnnotationSchema.js'
 import * as AuthToken from './AuthToken/AuthTokenSchema.js'
 import * as Block from './Block/BlockSchema.js'
 import * as Viewer from './Viewer/ViewerSchema.js'
@@ -62,6 +63,7 @@ export const typeDefs: any = gql`
   ${AgencyConversation.typeDefs}
   ${Agent.typeDefs}
   ${AgentConversation.typeDefs}
+  ${Annotation.typeDefs}
   ${AuthToken.typeDefs}
   ${Block.typeDefs}
   ${Viewer.typeDefs}
@@ -112,6 +114,7 @@ export const resolvers: ResolverDefs = {
   },
   ...Agency.resolvers,
   ...AgencyConversation.resolvers,
+  ...Annotation.resolvers,
   ...Agent.resolvers,
   ...AgentConversation.resolvers,
   ...AuthToken.resolvers,

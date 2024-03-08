@@ -49,6 +49,7 @@ import { getCallbacks } from '../websocket/callbacks.js'
 // import { dequeue, enqueue } from './mindQueue.js'
 import type { ModelConfig, UserSQL } from '../schema/User/UserSchema.js'
 import ShortTermSummarization from './ShortTermSummarization.js'
+import LongTermAnnotation from './LongTermAnnotation.js'
 
 export default class AgentMind {
   static chatIteration(
@@ -105,11 +106,27 @@ export default class AgentMind {
         )
         console.log('shortTermSummary', shortTermSummary)
 
+        LongTermAnnotation.backgroundAnnotate(user, model, lastMessage)
+
+        const longTermSummary = await LongTermAnnotation.searchAndSummarize(
+          user,
+          model,
+          shortTermSummary,
+          lastMessage,
+        )
+        console.log('longTermSummary', longTermSummary)
+
         const context: Array<GPTMessage> = [
           {
             role: 'system',
             content: `You are a helpful assistant. You will be given a prompt from the user and relevant context. Use all information to generate a helpful response.`,
           },
+          longTermSummary
+            ? {
+                role: 'assistant',
+                content: longTermSummary,
+              }
+            : null,
           shortTermSummary
             ? {
                 role: 'assistant',

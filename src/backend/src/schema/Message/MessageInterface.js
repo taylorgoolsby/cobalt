@@ -27,6 +27,18 @@ export default class MessageInterface {
     return rows
   }
 
+  static async getBatch(messageIds: Array<number>): Promise<Array<MessageSQL>> {
+    if (!messageIds.length) return []
+
+    const sql = sqltag`
+      SELECT * 
+      FROM ${Config.dbPrefix}_Message
+      WHERE messageId IN (${join(messageIds)});
+    `
+    const rows = await database.query(sql)
+    return rows
+  }
+
   static async getAll(agentConversationId: string): Promise<Array<MessageSQL>> {
     const sql = sqltag`
       SELECT * 
