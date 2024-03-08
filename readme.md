@@ -50,3 +50,19 @@ A background process will eventually annotate the newly stored chat message with
 ![Context Segmentation](/docs/context-segmentation.png)
 
 ![RAG with Memory](/docs/rag-with-memory.png)
+
+# Installation
+
+This project was built and tested on MacOS with Apple Silicon. It should work on other platforms, but it has not been tested. This project uses Node.js, MySQL, and Faiss. If you are using MacOS, this project should automatically install mysql for you using homebrew if you haven't already. If you are not using MacOS, you will need to install a MySQL and start it locally yourself.
+
+1. Download the source code from the GitHub repository.
+2. `cd cobalt`
+3. `yarn install`
+4. `npm start`
+
+This will start the backend services. The express server will run on localhost:4000 and mysql on localhost:3306.
+
+You will then need to start the frontend web server:
+
+1. `cd src/web`
+2. `npm start`
