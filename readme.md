@@ -4,7 +4,15 @@ This is an AI project which combines a RAG-like technique with memory management
 
 ## Use Cases
 
-A chatbot which runs as a single chat window is useful as a convenience in some cases, and in others, it may be crucial.
+**Cobalt** is a privacy-first digital assistant.
+
+It can help you with a wide range of tasks, such as:
+
+* Journaling.
+* Knowledge base management.
+* Brainstorming.
+
+It is a chatbot which runs as a single chat window. It runs locally on your device, and does not send any data to a server. It can connect to a language model running locally on your machine through LM Studio or ollama.
 
 ### No Chat Management
 
