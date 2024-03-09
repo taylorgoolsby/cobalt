@@ -45,22 +45,22 @@ import { redactedFields } from './utils/redact.js'
 
 const keys = ['9T9fNOr8o04PfTBRfZM/qMFPjMDmg3gdKmkwCpvKd1E=']
 
-Bugsnag.start({
-  // This key can be public:
-  apiKey: '135961c700e05de1db1294359a2f4af6',
-  plugins: [BugsnagPluginExpress],
-  appVersion: '1',
-  releaseStage: process.env.NODE_ENV,
-  enabledReleaseStages: ['production', 'staging'],
-  autoTrackSessions: false,
-  redactedKeys: redactedFields,
-})
-
-const bugsnagMiddleware = Bugsnag.getPlugin('express')
+// Bugsnag.start({
+//   // This key can be public:
+//   apiKey: '135961c700e05de1db1294359a2f4af6',
+//   plugins: [BugsnagPluginExpress],
+//   appVersion: '1',
+//   releaseStage: process.env.NODE_ENV,
+//   enabledReleaseStages: ['production', 'staging'],
+//   autoTrackSessions: false,
+//   redactedKeys: redactedFields,
+// })
+//
+// const bugsnagMiddleware = Bugsnag.getPlugin('express')
 
 const app: any = express()
 
-app.use(bugsnagMiddleware.requestHandler)
+// app.use(bugsnagMiddleware.requestHandler)
 
 // todo: restrict cors to our domains:
 app.use(cors())
@@ -488,6 +488,6 @@ app.use((req, res, next) => {
   })
 })
 
-app.use(bugsnagMiddleware.errorHandler)
+// app.use(bugsnagMiddleware.errorHandler)
 
 export default server
