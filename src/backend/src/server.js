@@ -37,11 +37,11 @@ import getSessionToken from './rest/internal/getSessionToken.js'
 import querystring from 'querystring'
 import AuthTokenInterface from './schema/AuthToken/AuthTokenInterface.js'
 import AgencyInterface from './schema/Agency/AgencyInterface.js'
-import Bugsnag from '@bugsnag/js'
-import BugsnagPluginExpress from '@bugsnag/plugin-express'
+// import Bugsnag from '@bugsnag/js'
+// import BugsnagPluginExpress from '@bugsnag/plugin-express'
 import setupWebsockets from './websocket/setupWebsockets.js'
 import fs from 'fs'
-import { redactedFields } from './utils/redact.js'
+// import { redactedFields } from './utils/redact.js'
 
 const keys = ['9T9fNOr8o04PfTBRfZM/qMFPjMDmg3gdKmkwCpvKd1E=']
 
