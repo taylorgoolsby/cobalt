@@ -1,5 +1,7 @@
 # Cobalt
 
+[![Discord](https://img.shields.io/badge/Join%20us%20on-Discord-blue?style=flat&logo=Discord)](https://discord.gg/upCyeVTh6B)
+
 This is an AI project which combines a RAG-like technique with memory management. Together, these enable a chatbot which only requires a single chat window for interaction. There are no new chats. Users can simply open the app and begin talking.
 
 ## Use Cases
