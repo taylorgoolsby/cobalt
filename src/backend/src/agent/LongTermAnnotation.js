@@ -36,7 +36,6 @@ export default class LongTermAnnotation {
     Promise.resolve().then(async () => {
       try {
         const text = message.data.text
-        console.log('annotating', text)
 
         if (!pipe) {
           pipe = await pipeline('feature-extraction', MODEL)
@@ -202,7 +201,6 @@ When producing annotations, ensure they are tailored to capture the essence of e
 
     const k = Math.min(10, index.ntotal())
     const res = index.search(vector, k)
-    console.log('vector search res', res)
     return res
   }
 
@@ -236,8 +234,6 @@ When producing annotations, ensure they are tailored to capture the essence of e
     )
 
     const annotations = await AnnotationInterface.retrieve(annotationIds)
-
-    console.log('annotations', annotations)
 
     // todo: timezone
 

@@ -153,6 +153,7 @@ Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities
     )
 
     for (let i = nonSystemMessages.length - 1; i >= 0; i--) {
+      console.log('i', i)
       const m = nonSystemMessages[i]
       const nextInput = `${m.role.toLowerCase()}: ${m.data.text}\n\n` + input
       const tokens = encode(
@@ -160,7 +161,6 @@ Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities
         'gpt-3.5-turbo',
       )
       if (SHORT_TERM_COMPLETION_TOKEN_LIMIT < tokens.length) {
-        console.log('short term tokens', tokens.length)
         break
       }
       input = nextInput
@@ -180,7 +180,7 @@ Output 2: "Planning a trip to Japan, visiting Tokyo and Kyoto. Unique activities
       },
     ]
 
-    console.log('context', context)
+    // console.log('context', context)
 
     const response = await InferenceRest.chatCompletion(user, model, context)
     const nextSummary = response.choices[0]?.message?.content ?? ''

@@ -96,15 +96,12 @@ export default class AgentMind {
 
         const lastMessage = allMessages[allMessages.length - 1]
 
-        console.log('lastMessage', lastMessage)
-
         const shortTermSummary = await ShortTermSummarization.performCompletion(
           user,
           model,
           agencyConversationId,
           allMessages,
         )
-        console.log('shortTermSummary', shortTermSummary)
 
         LongTermAnnotation.backgroundAnnotate(user, model, lastMessage)
 
@@ -114,7 +111,6 @@ export default class AgentMind {
           shortTermSummary,
           lastMessage,
         )
-        console.log('longTermSummary', longTermSummary)
 
         const context: Array<GPTMessage> = [
           {
