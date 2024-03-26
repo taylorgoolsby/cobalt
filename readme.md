@@ -76,3 +76,5 @@ You will then need to start the frontend web server:
 
 1. `cd src/web`
 2. `npm start`
+
+If you have issues with mysql on macOS or want to refresh the DB, run `npm run clean-sql`.
