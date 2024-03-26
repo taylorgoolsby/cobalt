@@ -18,3 +18,4 @@ artifact
 cdk.out
 .next
 _next
+index.faiss

@@ -195,7 +195,8 @@ When producing annotations, ensure they are tailored to capture the essence of e
       if (fs.existsSync(INDEX_PATH)) {
         index = Index.read(INDEX_PATH)
       } else {
-        throw new Error('Index not found')
+        return { distances: [], labels: [] }
+        // throw new Error('Index not found')
       }
     }
 

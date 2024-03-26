@@ -3,7 +3,7 @@
 import { loadEnv } from './loadEnv.js'
 const env = loadEnv()
 import nonMaybe from 'non-maybe'
-import credentials from './loadAwsCredentials.js'
+// import credentials from './loadAwsCredentials.js'
 import { raw } from '../sql-template-tag.js'
 import fs from 'fs'
 import path from 'path'
@@ -61,13 +61,14 @@ console.log('isLocal', isLocal)
 console.log('isStaging', isStaging)
 console.log('isProd', isProd)
 
-if (isLocal && !credentials.accessKeyId) {
-  throw new Error(
-    'When running locally, you should have aws_access_key_id defined in your ~/.aws/credentials file.',
-  )
-}
+// if (isLocal && !credentials.accessKeyId) {
+//   throw new Error(
+//     'When running locally, you should have aws_access_key_id defined in your ~/.aws/credentials file.',
+//   )
+// }
 
-const stage = !STAGE ? hash(credentials.accessKeyId) : nonMaybe(STAGE)
+// const stage = !STAGE ? hash(credentials.accessKeyId) : nonMaybe(STAGE)
+const stage = 'test'
 const dbPrefix = nonMaybe(DB_PREFIX)
 
 console.log('stage', stage)
@@ -96,6 +97,17 @@ const oauthGithubSecret = OAUTH_GITHUB_SECRET
 const oauthGoogleClientId = OAUTH_GOOGLE_CLIENT_ID
 const oauthGoogleSecret = OAUTH_GOOGLE_SECRET
 
+// const awsConfig: {
+//   region: string,
+//   credentials: {
+//     accessKeyId: string,
+//     secretAccessKey: string,
+//   },
+// } = {
+//   region: nonMaybe(AWS_REGION),
+//   credentials,
+// }
+
 const awsConfig: {
   region: string,
   credentials: {
@@ -104,7 +116,10 @@ const awsConfig: {
   },
 } = {
   region: nonMaybe(AWS_REGION),
-  credentials,
+  credentials: {
+    accessKeyId: '',
+    secretAccessKey: '',
+  },
 }
 
 const cdkEnvironment = env

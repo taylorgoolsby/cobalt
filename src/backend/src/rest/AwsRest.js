@@ -17,7 +17,8 @@ import { createHash, createHmac } from 'crypto'
 import util_utf8_1 from '@aws-sdk/util-utf8'
 import util_hex_encoding_1 from '@aws-sdk/util-hex-encoding'
 
-const client = new S3Client(Config.awsConfig)
+// const client = new S3Client(Config.awsConfig)
+const client = null
 
 export default class AwsRest {
   static async getSignedCreateMultipartUploadUrl(
@@ -205,6 +206,7 @@ ${hexHashCanonical}`
 
 async function send(command: any): Promise<any> {
   console.debug(`Sending AWS Command ${command.constructor.name}`)
+  // $FlowFixMe
   const res = await client.send(command)
   return res
 }
